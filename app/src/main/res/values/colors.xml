@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_page">#f5f4f1</color>
+    <color name="text_secondary">#6d6c6a</color>
+    <color name="text_primary">#1a1918</color>
+    <color name="primary_blue">#4a90d9</color>
+    <color name="primary_green">#3d8a5a</color>
+    <color name="disabled_gray">#bdbdbd</color>
+    <color name="warm_red">#d08068</color>
+    <color name="border_strong">#d1d0cd</color>
+    <color name="bg_card">#ffffff</color>
+    <color name="bg_muted">#edecea</color>
+    <color name="border_subtle">#e5e4e1</color>
+    <color name="text_tertiary">#9c9b99</color>
+    <color name="uncheck_track">#E0DFDC</color>
+</resources>
