@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.apero.composetraining.common.AppTheme
 
 /**
- * ⭐⭐⭐⭐ BÀI TẬP NÂNG CAO BUỔI 2: Streaming App Home (Netflix-style)
+ * ⭐⭐⭐⭐⭐ BONUS NÂNG CAO: Streaming App Home (Nested Scroll — Concept 5) (Netflix-style)
  *
  * Mô tả: Build Home screen với nested scrolling đúng cách
  *
@@ -128,7 +128,7 @@ private val categories = listOf("All", "Movies", "Series", "Anime", "Documentary
  *     modifier = Modifier.verticalScroll(...)
  * ) {
  *     HeroBanner(...)                         ← Box với gradient overlay
- *     CategoryChips(...)                      ← Row với horizontalScroll
+ *     CategoryChipRow(...)                    ← Row với horizontalScroll
  *
  *     movieSections.forEach { section ->
  *         SectionTitle(...)
@@ -137,7 +137,7 @@ private val categories = listOf("All", "Movies", "Series", "Anime", "Documentary
  * }
  *
  * ⚠️ WARNING: Đừng dùng LazyRow bên trong Column(verticalScroll)!
- * → LazyRow needs unbounded width constraint
+ * → LazyRow cần unbounded width constraint
  * → Column(verticalScroll) gives unbounded height
  * → Nested unbounded = CRASH
  *
@@ -145,40 +145,17 @@ private val categories = listOf("All", "Movies", "Series", "Anime", "Documentary
  */
 @Composable
 fun StreamingHomeScreen(modifier: Modifier = Modifier) {
-    val scrollState = rememberScrollState()
-    var selectedCategory by remember { mutableStateOf("All") }
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)  // ← Outer scroll
-            .background(Color(0xFF0D0D0D))
-    ) {
-        // ── Hero Banner ──────────────────────────────────────────────
-        HeroBanner(movie = featuredMovie)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // ── Category Chips ───────────────────────────────────────────
-        // Row(horizontalScroll) — OK bên trong Column(verticalScroll)
-        // Khác hướng scroll → không có conflict
-        CategoryChipRow(
-            categories = categories,
-            selectedCategory = selectedCategory,
-            onCategorySelect = { selectedCategory = it }
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // ── Movie Sections ───────────────────────────────────────────
-        movieSections.forEach { section ->
-            MovieSection(section = section)
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-
-        // Bottom spacing
-        Spacer(modifier = Modifier.height(80.dp))
-    }
+    // TODO: Implement StreamingHomeScreen
+    // - rememberScrollState() cho outer scroll
+    // - var selectedCategory by remember { mutableStateOf("All") }
+    // - Column với fillMaxSize + verticalScroll(scrollState) + background(Color(0xFF0D0D0D))
+    //   → HeroBanner(featuredMovie)
+    //   → Spacer(16.dp)
+    //   → CategoryChipRow(categories, selectedCategory, onCategorySelect)
+    //   → Spacer(24.dp)
+    //   → movieSections.forEach { section → MovieSection(section) + Spacer(24.dp) }
+    //   → Spacer(80.dp) ← space cho FAB
+    Box {}
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -187,16 +164,13 @@ fun StreamingHomeScreen(modifier: Modifier = Modifier) {
  * Hero Banner — Box với gradient text overlay
  *
  * TODO: [Buổi 2 — Box] Cấu trúc:
- * Box {
- *     // Background (movie poster placeholder)
- *     Box(fillMaxSize, background gradient)
- *
- *     // Overlay gradient (dark → transparent → dark)
- *     Box(fillMaxSize, background Brush.verticalGradient)
- *
- *     // Content (align Bottom)
- *     Column(Alignment.BottomStart) {
- *         Title + Genre + Action buttons
+ * Box(fillMaxWidth, height=280.dp) {
+ *     Box(fillMaxSize, background = movie.color) {   ← Background poster
+ *         Text emoji (80.sp, Alignment.Center)
+ *     }
+ *     Box(fillMaxSize, background = Brush.verticalGradient) ← Dark overlay
+ *     Column(Alignment.BottomStart, padding=16.dp) { ← Content
+ *         Text title + Text genre + Row buttons
  *     }
  * }
  */
@@ -205,84 +179,16 @@ fun HeroBanner(
     movie: Movie,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(280.dp)
-    ) {
-        // Background — movie poster placeholder
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(movie.color)
-        ) {
-            // Emoji làm placeholder poster
-            Text(
-                text = movie.emoji,
-                fontSize = 80.sp,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
-
-        // Dark gradient overlay — bottom heavy
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    androidx.compose.ui.graphics.Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.Black.copy(alpha = 0.3f),
-                            Color.Black.copy(alpha = 0.9f)
-                        )
-                    )
-                )
-        )
-
-        // Content — align Bottom
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(16.dp)
-        ) {
-            Text(
-                text = movie.title,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            Text(
-                text = "${movie.genre} · ⭐ ${movie.rating}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.8f)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Action buttons
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
-                    onClick = {},
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black
-                    ),
-                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp)
-                ) {
-                    Text("▶ Watch", fontWeight = FontWeight.Bold)
-                }
-                OutlinedButton(
-                    onClick = {},
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.White
-                    ),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text("+ My List")
-                }
-            }
-        }
-    }
+    // TODO: Implement HeroBanner
+    // - Box với fillMaxWidth + height(280.dp)
+    // - Lớp 1: Box nền với movie.color + emoji ở giữa
+    // - Lớp 2: Box overlay với Brush.verticalGradient (Transparent → Black.alpha0.3 → Black.alpha0.9)
+    // - Lớp 3: Column (align = BottomStart, padding = 16.dp):
+    //   → Text movie.title (headlineMedium, Bold, White)
+    //   → Text "${genre} · ⭐ ${rating}" (bodyMedium, White.alpha0.8)
+    //   → Spacer(12.dp)
+    //   → Row buttons: Button "▶ Watch" (White bg) + OutlinedButton "+ My List"
+    Box {}
 }
 
 @Composable
@@ -292,25 +198,12 @@ fun CategoryChipRow(
     onCategorySelect: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Row(horizontalScroll) — nhẹ hơn LazyRow cho list ngắn
-    Row(
-        modifier = modifier
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        categories.forEach { category ->
-            FilterChip(
-                selected = category == selectedCategory,
-                onClick = { onCategorySelect(category) },
-                label = { Text(category) },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primary,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
-        }
-    }
+    // TODO: Implement CategoryChipRow
+    // - Row với horizontalScroll(rememberScrollState()) + padding(horizontal=16.dp)
+    // - horizontalArrangement = spacedBy(8.dp)
+    // - Với mỗi category: FilterChip(selected, onClick, label)
+    // GỢI Ý: Row(horizontalScroll) nhẹ hơn LazyRow cho list ngắn (<10 items)
+    Box {}
 }
 
 @Composable
@@ -318,29 +211,14 @@ fun MovieSection(
     section: MovieSection,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
-        // Section title
-        Text(
-            text = section.title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-
-        // Movie row — Row(horizontalScroll) KHÔNG phải LazyRow
-        // TODO: [Buổi 2] Giải thích tại sao KHÔNG dùng LazyRow ở đây
-        Row(
-            modifier = Modifier
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            section.movies.forEach { movie ->
-                MovieCard(movie = movie)
-            }
-        }
-    }
+    // TODO: Implement MovieSection
+    // - Column:
+    //   → Text section.title (titleMedium, Bold, White, padding horizontal=16dp vertical=8dp)
+    //   → Row với horizontalScroll(rememberScrollState()) + padding(horizontal=16.dp) + spacedBy(12.dp)
+    //   → Mỗi movie: MovieCard(movie)
+    // GỢI Ý: Tại sao KHÔNG dùng LazyRow ở đây?
+    // → Nested Lazy với cùng hướng scroll → crash. Khác hướng thì OK.
+    Box {}
 }
 
 @Composable
@@ -348,48 +226,12 @@ fun MovieCard(
     movie: Movie,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-            .width(120.dp)
-            .height(160.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(movie.color)
-    ) {
-        // Poster emoji placeholder
-        Text(
-            text = movie.emoji,
-            fontSize = 40.sp,
-            modifier = Modifier.align(Alignment.Center)
-        )
-
-        // Bottom info overlay
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .fillMaxWidth()
-                .background(
-                    androidx.compose.ui.graphics.Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
-                    )
-                )
-                .padding(8.dp)
-        ) {
-            Column {
-                Text(
-                    text = movie.title,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    maxLines = 1
-                )
-                Text(
-                    text = "⭐ ${movie.rating}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.7f)
-                )
-            }
-        }
-    }
+    // TODO: Implement MovieCard
+    // - Box với width(120.dp) + height(160.dp) + clip(RoundedCornerShape(8.dp)) + background(movie.color)
+    // - Text emoji (40.sp, align = Center)
+    // - Box overlay gradient ở BottomCenter (Transparent → Black.alpha0.8)
+    //   + Column bên trong: Text title (labelSmall, Bold, White) + Text "⭐ ${rating}" (labelSmall, White.alpha0.7)
+    Box {}
 }
 
 // ─── Preview ─────────────────────────────────────────────────────────────────
@@ -417,23 +259,7 @@ private fun HeroBannerPreview() {
 // ─── Câu Hỏi Thảo Luận ───────────────────────────────────────────────────────
 /*
  * Q1: Tại sao Row(horizontalScroll) thay vì LazyRow bên trong Column(verticalScroll)?
- *     → Column(verticalScroll) cho unlimited height constraint
- *     → LazyRow cần width constraint để lazy-load đúng
- *     → Kết hợp 2 cái → "Nesting scrollable in the same direction" → crash hoặc không render
- *     → GIẢI PHÁP: Row(horizontalScroll) là non-lazy → không có constraint conflict
- *     → Hoặc: Dùng LazyColumn bên ngoài + item { Row(horizontalScroll) } bên trong
- *
  * Q2: Khi nào dùng Row(horizontalScroll) vs LazyRow?
- *     → < 20 items: Row(horizontalScroll) — đơn giản hơn, không overhead
- *     → > 20 items hoặc cần recycling: LazyRow — nhưng phải đặt trong LazyColumn parent
- *
  * Q3: Gradient overlay trên HeroBanner — tại sao cần 2 Box thay vì 1?
- *     → Box 1: Background/poster
- *     → Box 2: Overlay gradient (separate layer để control opacity riêng)
- *     → Nếu gộp vào 1: không thể animate overlay opacity độc lập
- *
  * Q4: contentPadding vs padding — khác gì?
- *     → padding(16.dp) trên Column → space bên ngoài, items bị clip khi scroll
- *     → contentPadding (LazyColumn) → items scroll đến tận edge, chỉ có padding ở đầu/cuối
- *     → Bài này dùng padding trên từng Row vì đơn giản hơn
  */
