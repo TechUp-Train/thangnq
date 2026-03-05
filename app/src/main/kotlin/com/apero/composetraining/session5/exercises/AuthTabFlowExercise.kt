@@ -6,12 +6,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.apero.composetraining.common.AppTheme
+// TODO: Thêm imports Nav3
+// import androidx.navigation3.runtime.NavKey
+// import androidx.navigation3.runtime.entryProvider
+// import androidx.navigation3.runtime.rememberNavBackStack
+// import androidx.navigation3.ui.NavDisplay
+// import kotlinx.serialization.Serializable
 
 /**
  * ⭐⭐⭐⭐ BÀI TẬP 4: Auth + Tab App (Advanced — 120 phút)
@@ -30,21 +36,22 @@ import com.apero.composetraining.common.AppTheme
  *
  * Cấu trúc gợi ý:
  * ```kotlin
- * // Auth keys
- * sealed class AuthKey {
- *     data object Login : AuthKey()
- *     data object Register : AuthKey()
- *     data object ForgotPassword : AuthKey()
+ * // Auth keys — sealed class + @Serializable + NavKey
+ * @Serializable
+ * sealed class AuthKey : NavKey {
+ *     @Serializable data object Login : AuthKey()
+ *     @Serializable data object Register : AuthKey()
+ *     @Serializable data object ForgotPassword : AuthKey()
  * }
  *
  * // Main keys
- * data object FeedKey
- * data class PostDetailKey(val postId: Int)
- * data object DiscoverKey
- * data object ProfileKey
- * data object EditProfileKey
+ * @Serializable data object FeedKey : NavKey
+ * @Serializable data class PostDetailKey(val postId: Int) : NavKey
+ * @Serializable data object DiscoverKey : NavKey
+ * @Serializable data object ProfileKey : NavKey
+ * @Serializable data object EditProfileKey : NavKey
  *
- * // App level
+ * // App level — conditional rendering
  * @Composable
  * fun AuthTabApp() {
  *     var isAuthenticated by remember { mutableStateOf(false) }
@@ -56,15 +63,21 @@ import com.apero.composetraining.common.AppTheme
  *     }
  * }
  *
- * // Auth flow — back stack riêng
+ * // Auth flow — back stack riêng, bị destroy khi switch sang Main
  * @Composable
  * fun AuthFlow(onLoginSuccess: () -> Unit) {
- *     val backStack = rememberMutableStateListOf<AuthKey>(AuthKey.Login)
+ *     val backStack = rememberNavBackStack<Any>(AuthKey.Login)
  *     NavDisplay(
  *         backStack = backStack,
  *         onBack = { if (backStack.size > 1) backStack.removeLastOrNull() },
  *         entryProvider = entryProvider {
- *             entry<AuthKey.Login> { LoginScreen(onLogin = onLoginSuccess, onRegister = { backStack.add(AuthKey.Register) }) }
+ *             entry<AuthKey.Login> {
+ *                 LoginScreen(
+ *                     onLogin = onLoginSuccess,
+ *                     onRegister = { backStack.add(AuthKey.Register) },
+ *                     onForgotPassword = { backStack.add(AuthKey.ForgotPassword) }
+ *                 )
+ *             }
  *             entry<AuthKey.Register> { RegisterScreen(onBack = { backStack.removeLastOrNull() }) }
  *             entry<AuthKey.ForgotPassword> {
  *                 var showDialog by remember { mutableStateOf(false) }
@@ -79,27 +92,31 @@ import com.apero.composetraining.common.AppTheme
  * // Main flow — 3 tabs, per-tab stacks
  * @Composable
  * fun MainFlow(onLogout: () -> Unit) {
- *     val feedStack = rememberMutableStateListOf<Any>(FeedKey)
- *     val discoverStack = rememberMutableStateListOf<Any>(DiscoverKey)
- *     val profileStack = rememberMutableStateListOf<Any>(ProfileKey)
- *     var currentTab by remember { mutableStateOf(Tab.FEED) }
+ *     val feedStack = rememberNavBackStack<Any>(FeedKey)
+ *     val discoverStack = rememberNavBackStack<Any>(DiscoverKey)
+ *     val profileStack = rememberNavBackStack<Any>(ProfileKey)
+ *     var currentTab by rememberSaveable { mutableStateOf(Tab.FEED) }
  *     val currentStack = when(currentTab) { ... }
  *
  *     Scaffold(bottomBar = { ... }) { padding ->
- *         NavDisplay(backStack = currentStack, ...) {
- *             entry<FeedKey> { FeedScreen(...) }
- *             entry<PostDetailKey> { key -> PostDetailScreen(postId = key.postId) }
- *             entry<ProfileKey> {
- *                 // LaunchedEffect: fetch user data khi vào screen
- *                 var user by remember { mutableStateOf<UserData?>(null) }
- *                 LaunchedEffect(Unit) {
- *                     delay(500) // giả lập network
- *                     user = UserData("Nguyễn Quang Minh", "Android Dev")
+ *         NavDisplay(
+ *             backStack = currentStack,
+ *             onBack = { ... },
+ *             entryProvider = entryProvider {
+ *                 entry<FeedKey> { FeedScreen(...) }
+ *                 entry<PostDetailKey> { key -> PostDetailScreen(postId = key.postId) }
+ *                 entry<ProfileKey> {
+ *                     // LaunchedEffect: fetch user data khi vào screen
+ *                     var user by remember { mutableStateOf<UserData?>(null) }
+ *                     LaunchedEffect(Unit) {
+ *                         delay(500) // giả lập network
+ *                         user = UserData("Nguyễn Quang Minh", "Android Dev")
+ *                     }
+ *                     ProfileScreen(user = user, onLogout = onLogout)
  *                 }
- *                 ProfileScreen(user = user, onLogout = onLogout)
+ *                 // ...
  *             }
- *             // ...
- *         }
+ *         )
  *     }
  * }
  * ```
@@ -113,8 +130,13 @@ import com.apero.composetraining.common.AppTheme
  */
 
 // TODO: [Session 6] Bài tập 4 - Định nghĩa AuthKey sealed class
+// @Serializable
+// sealed class AuthKey : NavKey { ... }
 
-// TODO: [Session 6] Bài tập 4 - Định nghĩa Main keys (FeedKey, PostDetailKey, DiscoverKey, ProfileKey, EditProfileKey)
+// TODO: [Session 6] Bài tập 4 - Định nghĩa Main keys
+// @Serializable data object FeedKey : NavKey
+// @Serializable data class PostDetailKey(val postId: Int) : NavKey
+// ...
 
 // TODO: [Session 6] Bài tập 4 - data class UserData(val name: String, val role: String)
 

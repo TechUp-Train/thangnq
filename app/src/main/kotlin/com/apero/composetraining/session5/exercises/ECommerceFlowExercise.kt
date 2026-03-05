@@ -8,30 +8,41 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.apero.composetraining.common.AppTheme
+// TODO: Thêm imports Nav3
+// import androidx.navigation3.runtime.NavKey
+// import androidx.navigation3.runtime.entryProvider
+// import androidx.navigation3.runtime.rememberNavBackStack
+// import androidx.navigation3.ui.NavDisplay
+// import kotlinx.serialization.Serializable
 
 /**
  * ⭐⭐⭐ BÀI TẬP 3: E-Commerce Flow (Challenge — 90 phút)
  *
  * Yêu cầu:
- * - Flow: CategoryListKey → ProductListKey(categoryId) → ProductDetailKey(productId) → CartKey
- * - Dùng sealed class ProductFlowKey để nhóm tất cả keys
+ * - Flow: CategoryList → ProductList(categoryId) → ProductDetail(productId) → Cart
+ * - Dùng sealed class ProductFlowKey : NavKey để nhóm tất cả keys
  * - "Add to Cart" không navigate — chỉ update cartCount (Int state)
  * - CartKey hiện danh sách items + tổng giá
- * - BackHandler trên CartKey: hiện confirm dialog "Bỏ giỏ hàng?" trước khi back
- * - Badge trên cart icon (NavigationBar) hiện số lượng items
+ * - BackHandler trên Cart: hiện confirm dialog "Bỏ giỏ hàng?" trước khi back
+ * - Badge trên cart icon hiện số lượng items
  *
  * Sealed class gợi ý:
  * ```kotlin
- * sealed class ProductFlowKey {
- *     data object CategoryList : ProductFlowKey()
- *     data class ProductList(val categoryId: Int) : ProductFlowKey()
- *     data class ProductDetail(val productId: Int, val categoryId: Int) : ProductFlowKey()
- *     data object Cart : ProductFlowKey()
+ * @Serializable
+ * sealed class ProductFlowKey : NavKey {
+ *     @Serializable data object CategoryList : ProductFlowKey()
+ *     @Serializable data class ProductList(val categoryId: Int) : ProductFlowKey()
+ *     @Serializable data class ProductDetail(val productId: Int, val categoryId: Int) : ProductFlowKey()
+ *     @Serializable data object Cart : ProductFlowKey()
  * }
+ * ```
+ *
+ * Back stack dùng <Any> vì NavDisplay yêu cầu List<Any>:
+ * ```kotlin
+ * val backStack = rememberNavBackStack<Any>(ProductFlowKey.CategoryList)
  * ```
  *
  * BackHandler pattern:
@@ -39,10 +50,7 @@ import com.apero.composetraining.common.AppTheme
  * entry<ProductFlowKey.Cart> {
  *     var showConfirmDialog by remember { mutableStateOf(false) }
  *
- *     // Override back behavior
- *     BackHandler {
- *         showConfirmDialog = true
- *     }
+ *     BackHandler { showConfirmDialog = true }
  *
  *     CartScreen(onBack = { showConfirmDialog = true })
  *
@@ -72,8 +80,9 @@ import com.apero.composetraining.common.AppTheme
  * - Data class keys pass data đúng (categoryId, productId)
  */
 
-// TODO: [Session 6] Bài tập 3 - Định nghĩa sealed class ProductFlowKey
-// sealed class ProductFlowKey { ... }
+// TODO: [Session 6] Bài tập 3 - Định nghĩa sealed class ProductFlowKey : NavKey
+// @Serializable
+// sealed class ProductFlowKey : NavKey { ... }
 
 // TODO: [Session 6] Bài tập 3 - Sample data
 // data class Product(val id: Int, val name: String, val price: Int, val categoryId: Int)
@@ -85,7 +94,7 @@ import com.apero.composetraining.common.AppTheme
 @Composable
 fun ECommerceApp() {
     // TODO: Back stack bắt đầu từ CategoryList
-    // val backStack = rememberMutableStateListOf<ProductFlowKey>(ProductFlowKey.CategoryList)
+    // val backStack = rememberNavBackStack<Any>(ProductFlowKey.CategoryList)
 
     // TODO: Cart state (danh sách products đã add)
     // val cartItems = remember { mutableStateListOf<Product>() }

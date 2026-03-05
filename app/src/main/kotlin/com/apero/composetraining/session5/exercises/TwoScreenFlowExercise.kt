@@ -1,39 +1,46 @@
 package com.apero.composetraining.session5.exercises
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.apero.composetraining.common.AppTheme
+// TODO: Thêm imports Nav3
+// import androidx.navigation3.runtime.NavKey
+// import androidx.navigation3.runtime.entryProvider
+// import androidx.navigation3.runtime.rememberNavBackStack
+// import androidx.navigation3.ui.NavDisplay
+// import kotlinx.serialization.Serializable
 
 /**
  * ⭐ BÀI TẬP 1: 2-Screen Flow (Easy — 30 phút)
  *
- * Học Navigation 3: Back stack là MutableList<Any>, không phải NavController
+ * Học Navigation 3: Back stack là List<NavKey>, không phải NavController
  *
  * Yêu cầu:
- * - Định nghĩa 2 keys: data object WelcomeKey + data object HomeKey
- * - Back stack: rememberMutableStateListOf<Any>(WelcomeKey)
+ * - Định nghĩa 2 keys: @Serializable data object WelcomeKey : NavKey
+ * - Back stack: rememberNavBackStack(WelcomeKey)
  * - NavDisplay với entryProvider mapping key → screen
- * - Welcome screen: Button "Get Started" → backStack.add(HomeKey)
- * - Home screen: Button "Logout" → backStack.clear(); backStack.add(WelcomeKey)
+ * - Welcome screen: Button "Bắt đầu" → backStack.add(HomeKey)
+ * - Home screen: Button "Đăng xuất" → backStack.clear(); backStack.add(WelcomeKey)
  * - Back button (hardware/gesture) từ Home → Welcome hoạt động đúng
  *
  * Gợi ý:
  * ```kotlin
- * // 1. Keys
- * data object WelcomeKey
- * data object HomeKey
+ * // 1. Keys — cần @Serializable và implement NavKey
+ * @Serializable
+ * data object WelcomeKey : NavKey
  *
- * // 2. Back stack
- * val backStack = rememberMutableStateListOf<Any>(WelcomeKey)
+ * @Serializable
+ * data object HomeKey : NavKey
  *
- * // 3. NavDisplay
+ * // 2. Back stack — dùng rememberNavBackStack
+ * val backStack = rememberNavBackStack(WelcomeKey)
+ *
+ * // 3. NavDisplay với entryProvider DSL
  * NavDisplay(
  *     backStack = backStack,
  *     onBack = { backStack.removeLastOrNull() },
@@ -45,20 +52,23 @@ import com.apero.composetraining.common.AppTheme
  * ```
  *
  * Tiêu chí nghiệm thu:
- * - Type-safe keys (không dùng String route)
+ * - Type-safe keys với @Serializable + NavKey (không dùng String route)
  * - Navigate và back hoạt động đúng
  * - Logout clear stack (không còn back về Home sau logout)
  */
 
 // TODO: [Session 6] Bài tập 1 - Định nghĩa type-safe keys
-// data object WelcomeKey
-// data object HomeKey
+// @Serializable
+// data object WelcomeKey : NavKey
+//
+// @Serializable
+// data object HomeKey : NavKey
 
 // TODO: [Session 6] Bài tập 1 - Implement TwoScreenFlowApp
 @Composable
 fun TwoScreenFlowApp() {
     // TODO: Tạo back stack
-    // val backStack = rememberMutableStateListOf<Any>(WelcomeKey)
+    // val backStack = rememberNavBackStack(WelcomeKey)
 
     // TODO: NavDisplay với entryProvider cho 2 screens
     // NavDisplay(
