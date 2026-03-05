@@ -2,12 +2,14 @@ package com.apero.composetraining.session2.exercises
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -72,7 +74,7 @@ data class UserProfile(
 @Composable
 fun ProfileCardScreen() {
     val profile = UserProfile(
-        name = "Nguyễn Quang Minh",
+        name = "Nguyen Quang Thang",
         jobTitle = "Android Developer tại Apero",
         postsCount = 128,
         followersCount = 1200,
@@ -108,14 +110,58 @@ fun ProfileCardScreen() {
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(profile.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text(profile.jobTitle, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    profile.jobTitle,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Spacer(Modifier.height(16.dp))
-                Text("TODO: Implement stats row với IntrinsicSize.Min + VerticalDivider",
-                    color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
-                Spacer(Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min)
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    StatItemCompose(label = "Posts", value = profile.postsCount.toString())
+                    VerticalDivider(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        thickness = 1.dp,
+                        color = Color.Gray.copy(alpha = 0.5f)
+                    )
+                    StatItemCompose(label = "Followers", value = profile.followersCount.toString())
+                    VerticalDivider(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        thickness = 1.dp,
+                        color = Color.Gray.copy(alpha = 0.5f)
+                    )
+                    StatItemCompose(label = "Following", value = profile.followingCount.toString())
+                }
+                Spacer(Modifier.weight(1f))
                 Button(onClick = {}, modifier = Modifier.fillMaxWidth()) { Text("Follow") }
             }
         }
+    }
+}
+
+@Composable
+fun StatItemCompose(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = label,
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            color = Color.Black
+        )
+        Text(
+            text = value,
+            fontWeight = FontWeight.Normal,
+            fontSize = 14.sp,
+            color = Color.Gray
+        )
     }
 }
 
