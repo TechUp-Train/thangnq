@@ -3,12 +3,17 @@ package com.apero.composetraining.session2.exercises
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.apero.composetraining.common.AppTheme
@@ -67,65 +72,195 @@ private val sampleStats = listOf(
 )
 
 private val sampleItems = (1..8).map { i ->
-    DashboardItem(i, "App #$i", "Mô tả app $i ngắn gọn", listOf("AI", "Photo", "Video", "Utility")[i % 4])
+    DashboardItem(
+        i,
+        "App #$i",
+        "Mô tả app $i ngắn gọn",
+        listOf("AI", "Photo", "Video", "Utility")[i % 4]
+    )
 }
 
-// TODO: [Session 2] Bài tập 3 - Implement DashboardScreen
-// Dùng BoxWithConstraints để switch layout:
-// @Composable
-// fun DashboardScreen(
-//     stats: List<StatItem> = sampleStats,
-//     items: List<DashboardItem> = sampleItems,
-//     isPremium: Boolean = false
-// ) {
-//     BoxWithConstraints {
-//         if (maxWidth < 600.dp) PhoneLayout(stats, items, isPremium)
-//         else TabletLayout(stats, items, isPremium)
-//     }
-// }
+@Composable
+fun DashboardScreen(
+    stats: List<StatItem> = sampleStats,
+    items: List<DashboardItem> = sampleItems,
+    isPremium: Boolean = false
+) {
+    BoxWithConstraints {
+        if (maxWidth < 600.dp) {
+            PhoneLayout(stats, items, isPremium)
+        } else {
+            TabletLayout(stats, items, isPremium)
+        }
+    }
+}
 
-// TODO: [Session 2] Bài tập 3 - Implement StatsRow (dùng IntrinsicSize.Min)
-// Row(Modifier.height(IntrinsicSize.Min).fillMaxWidth()) {
-//     stats.forEachIndexed { index, stat ->
-//         StatColumn(stat, Modifier.weight(1f))
-//         if (index < stats.size - 1) VerticalDivider()
-//     }
-// }
+@Composable
+fun StatsRow(stats: List<StatItem>, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .height(IntrinsicSize.Min)
+            .fillMaxWidth()
+    ) {
+        stats.forEachIndexed { index, stat ->
+            StatColumn(stat, Modifier.weight(1f))
+            if (index < stats.size - 1) {
+                VerticalDivider()
+            }
+        }
+    }
+}
 
-// TODO: [Session 2] Bài tập 3 - Implement PremiumBanner (dùng drawBehind)
-// Box(
-//     modifier = Modifier
-//         .fillMaxWidth()
-//         .height(80.dp)
-//         .drawBehind {
-//             drawRect(brush = Brush.horizontalGradient(...))
-//         }
-// ) { ... }
+@Composable
+fun StatColumn(stat: StatItem, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stat.value,
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = stat.label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        if (stat.unit.isNotEmpty()) {
+            Text(
+                text = stat.unit,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
 
-// TODO: [Session 2] Bài tập 3 - Implement PhoneLayout
-// LazyColumn: PremiumBanner + StatsRow + items(DashboardCard) 1 per row
+@Composable
+fun PremiumBanner(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            .drawBehind(onDraw = {
+                drawRect(
+                    brush = Brush.horizontalGradient(
+                        listOf(
+                            Color.Black.copy(alpha = 0.8f),
+                            Color.Black.copy(alpha = 0.4f)
+                        )
 
-// TODO: [Session 2] Bài tập 3 - Implement TabletLayout
-// LazyVerticalGrid(GridCells.Fixed(2)): header + items(DashboardCard) 2 per row
+                    )
+                )
+            })
+            .padding(16.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Column {
+            Text(
+                text = "⭐ Premium Member",
+                style = MaterialTheme.typography.titleMedium,
+                color = androidx.compose.ui.graphics.Color.White
+            )
+            Text(
+                text = "Enjoy unlimited access to all features",
+                style = MaterialTheme.typography.bodySmall,
+                color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.9f)
+            )
+        }
+    }
+}
 
-// TODO: [Session 2] Bài tập 3 - Implement DashboardCard (stateless)
-// Card: title bold + description + category chip
+@Composable
+fun PhoneLayout(
+    stats: List<StatItem>,
+    items: List<DashboardItem>,
+    isPremium: Boolean
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        if (isPremium) {
+            item {
+                PremiumBanner()
+            }
+        }
+
+        item {
+            Card {
+                StatsRow(stats)
+            }
+        }
+
+        items(items.size) { index ->
+            DashboardCard(items[index])
+        }
+    }
+}
+
+@Composable
+fun TabletLayout(
+    stats: List<StatItem>,
+    items: List<DashboardItem>,
+    isPremium: Boolean
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        if (isPremium) {
+            item(span = { GridItemSpan(2) }) {
+                PremiumBanner()
+            }
+        }
+
+        item(span = { GridItemSpan(2) }) {
+            Card {
+                StatsRow(stats)
+            }
+        }
+
+        items(items) {
+            DashboardCard(it)
+        }
+    }
+}
+
+@Composable
+fun DashboardCard(item: DashboardItem, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = item.title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = item.description,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold
+            )
+            SuggestionChip(
+                onClick = { },
+                label = { Text(item.category) }
+            )
+        }
+    }
+}
 
 @Composable
 fun ResponsiveDashboardScreen() {
-    // TODO: Thay bằng DashboardScreen() đã implement
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text("Responsive Dashboard", style = MaterialTheme.typography.headlineSmall)
-        Text("TODO: dùng BoxWithConstraints để switch Phone/Tablet layout",
-            color = MaterialTheme.colorScheme.error)
-        Text("TODO: StatsRow với IntrinsicSize.Min + VerticalDivider",
-            color = MaterialTheme.colorScheme.error)
-        Text("TODO: PremiumBanner với Modifier.drawBehind gradient",
-            color = MaterialTheme.colorScheme.error)
-    }
+    DashboardScreen(isPremium = true)
 }
 
 @Preview(showBackground = true, widthDp = 360)
