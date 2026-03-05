@@ -59,8 +59,12 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
-    // Navigation
+    // Navigation 2.x (dùng trong demos so sánh)
     implementation("androidx.navigation:navigation-compose:2.8.5")
+    // Navigation 3 — dạy trong Buổi 6
+    // TODO: Cần AGP 8.9.1+ và compileSdk 36 để dùng navigation3-ui:1.0.0+
+    // Uncomment khi update build config:
+    // implementation("androidx.navigation3:navigation3-ui:1.0.0")
 
     // Serialization (for type-safe navigation)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
