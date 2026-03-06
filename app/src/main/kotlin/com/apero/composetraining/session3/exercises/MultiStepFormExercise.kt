@@ -1,27 +1,42 @@
 package com.apero.composetraining.session3.exercises
 
 import android.content.res.Configuration
+import android.widget.Button
+import android.widget.Space
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.apero.composetraining.common.AppTheme
+import com.apero.composetraining.R
 
 /**
  * ⭐⭐⭐⭐ BÀI TẬP 4: Multi-step Registration Form (Advanced)
@@ -87,13 +102,14 @@ data class FormState(
 
 val FormState.totalSteps: Int get() = 4
 val FormState.progress: Float get() = (currentStep + 1).toFloat() / totalSteps.toFloat()
-val FormState.stepTitle: String get() = when (currentStep) {
-    0 -> "Personal Info"
-    1 -> "Contact Details"
-    2 -> "Preferences"
-    3 -> "Review & Submit"
-    else -> ""
-}
+val FormState.stepTitle: String
+    get() = when (currentStep) {
+        0 -> "Personal Info"
+        1 -> "Contact Details"
+        2 -> "Preferences"
+        3 -> "Review & Submit"
+        else -> ""
+    }
 
 /**
  * sealed class FormAction — type-safe events từ UI lên ViewModel/Host
@@ -137,7 +153,27 @@ fun reduceFormState(state: FormState, action: FormAction): FormState {
     // - PrevStep → copy(currentStep = max(currentStep - 1, 0))
     // - Submit → copy(isSubmitted = true)
     // GỢI Ý: Dùng when (action) { is UpdateFirstName → ... }
-    TODO("Not yet implemented")
+    return when (action) {
+        is FormAction.NextStep -> {
+            var currentStep = state.currentStep
+            if (currentStep < state.totalSteps - 1) {
+                currentStep++
+            }
+            state.copy(currentStep = currentStep)
+        }
+
+        is FormAction.PrevStep -> {
+            var currentStep = state.currentStep
+            if (currentStep > 0) {
+                currentStep--
+            }
+            state.copy(currentStep = currentStep)
+        }
+
+        else -> {
+            state
+        }
+    }
 }
 
 private fun validateCurrentStep(state: FormState): FormState {
@@ -168,7 +204,22 @@ fun MultiStepFormScreen(modifier: Modifier = Modifier) {
     // 3. Kiểm tra formState.isSubmitted:
     //    → true: SubmissionSuccessScreen(formState)
     //    → false: FormContent(formState, onAction)
-    Box {}
+    var formState by remember { mutableStateOf(FormState()) }
+    val onAction: (FormAction) -> Unit =
+        { action -> formState = reduceFormState(formState, action) }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.bg_page))
+    ) {
+        FormContent(
+            state = formState,
+            onAction = onAction,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = colorResource(R.color.bg_page))
+        )
+    }
 }
 
 // ─── Stateless Form Content (UDF Consumer) ───────────────────────────────────
@@ -201,19 +252,73 @@ private fun FormContent(
     //       modifier = Modifier.weight(1f)
     //   ) { step → when(step) { 0 → PersonalInfoStep, 1 → ContactStep, 2 → PreferencesStep, 3 → ReviewStep } }
     // - FormNavigationButtons(state, onAction)
-    Box {}
+
+    Scaffold(
+        modifier = modifier,
+        bottomBar = {
+            FormNavigationButtons(state = state, onAction = onAction)
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .background(colorResource(R.color.bg_page))
+                .padding(paddingValues)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                FormHeader()
+                Spacer(modifier = Modifier.size(16.dp))
+                LinearProgressIndicator(
+                    progress = { state.progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(12.dp),
+                    color = colorResource(R.color.primary_blue),
+                    trackColor = colorResource(R.color.bg_muted)
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+                Text(
+                    text = "Bước ${state.currentStep + 1} / ${state.totalSteps} — ${state.stepTitle}",
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily(Font(R.font.outfit_font)),
+                    color = colorResource(R.color.text_tertiary),
+                    fontSize = 12.sp
+                )
+                Spacer(modifier = Modifier.size(24.dp))
+            }
+        }
+    }
 }
 
 // ─── Form Header ──────────────────────────────────────────────────────────────
 
 @Composable
 private fun FormHeader(
-    state: FormState,
+//    state: FormState,
     modifier: Modifier = Modifier,
 ) {
     // TODO: Implement FormHeader
     // - Column: Text "Registration Form" (headlineMedium) + Text subtitle (bodyMedium, onSurfaceVariant)
-    Box {}
+    Box {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = null,
+                tint = colorResource(R.color.text_primary)
+            )
+            Text(
+                text = "Đăng Ký", fontSize = 22.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontFamily = FontFamily(Font(R.font.outfit_font)),
+                color = colorResource(R.color.text_primary),
+                modifier = Modifier.padding(start = 15.dp)
+            )
+        }
+    }
 }
 
 // ─── Step 1: Personal Info ────────────────────────────────────────────────────
@@ -320,7 +425,52 @@ private fun FormNavigationButtons(
     // - Row(fillMaxWidth, spacedBy=12.dp, padding top=16.dp)
     // - Nếu currentStep > 0: OutlinedButton "Back" (weight(1f)) → onAction(PrevStep)
     // - Button "Next" hoặc "Submit" (weight(1f)) → onAction(NextStep) hoặc onAction(Submit)
-    Box {}
+    Surface(
+        color = Color.White,
+        modifier = Modifier.shadow(8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            OutlinedButton(
+                onClick = { onAction.invoke(FormAction.PrevStep) },
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier.weight(1f),
+                border = BorderStroke(
+                    width = 1.dp,
+                    colorResource(R.color.border_strong)
+                ),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = colorResource(R.color.text_secondary)
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = null
+                )
+                Text(text = "Trước")
+            }
+            Spacer(modifier = Modifier.size(20.dp))
+            Button(
+                onClick = { onAction.invoke(FormAction.NextStep) },
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier.weight(2f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(R.color.primary_blue),
+                    contentColor = Color.White
+                )
+            ) {
+                Text(text = "Sau")
+                Icon(
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = null
+                )
+            }
+        }
+    }
 }
 
 // ─── Shared Components ────────────────────────────────────────────────────────
@@ -370,7 +520,7 @@ private fun SubmissionSuccessScreen(
 
 // ─── Previews ─────────────────────────────────────────────────────────────────
 
-@Preview(showBackground = true, name = "Multi Step Form - Light")
+//@Preview(showBackground = true, name = "Multi Step Form - Light")
 @Composable
 private fun MultiStepFormPreview() {
     AppTheme {
@@ -404,13 +554,13 @@ private fun ReviewStepPreview() {
             receiveNewsletter = true,
             receiveNotifications = true,
             preferredLanguage = "Vietnamese",
-            currentStep = 3,
+            currentStep = 1,
         )
         FormContent(state = sampleState, onAction = {})
     }
 }
 
-@Preview(showBackground = true, name = "Success Screen Preview")
+//@Preview(showBackground = true, name = "Success Screen Preview")
 @Composable
 private fun SuccessScreenPreview() {
     AppTheme {
@@ -418,4 +568,22 @@ private fun SuccessScreenPreview() {
             formState = FormState(firstName = "John", lastName = "Doe"),
         )
     }
+}
+
+@Preview
+@Composable
+private fun HeaderPreview() {
+    val sampleState = FormState(
+        firstName = "John",
+        lastName = "Doe",
+        birthYear = "1995",
+        email = "john@example.com",
+        phone = "0901234567",
+        city = "Ho Chi Minh City",
+        receiveNewsletter = true,
+        receiveNotifications = true,
+        preferredLanguage = "Vietnamese",
+        currentStep = 3,
+    )
+    FormHeader()
 }
