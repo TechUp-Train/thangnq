@@ -1,27 +1,62 @@
 package com.apero.composetraining.session3.exercises
 
 import android.content.res.Configuration
-import android.widget.Button
-import android.widget.Space
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.LocationCity
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -29,14 +64,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.apero.composetraining.common.AppTheme
 import com.apero.composetraining.R
+import com.apero.composetraining.common.AppTheme
 
 /**
  * ⭐⭐⭐⭐ BÀI TẬP 4: Multi-step Registration Form (Advanced)
@@ -144,49 +178,72 @@ sealed class FormAction {
  * - Dễ test: chỉ cần verify output state
  */
 fun reduceFormState(state: FormState, action: FormAction): FormState {
-    // TODO: Implement reduceFormState
-    // Với mỗi FormAction, trả về state.copy(...) phù hợp:
-    // - UpdateFirstName → copy(firstName = action.value, firstNameError = null)
-    // - UpdateEmail → copy(email = action.value, emailError = null)
-    // - NextStep → validate trước (gọi validateCurrentStep), nếu có lỗi → trả lại state có lỗi
-    //              nếu OK → copy(currentStep = min(currentStep + 1, totalSteps - 1))
-    // - PrevStep → copy(currentStep = max(currentStep - 1, 0))
-    // - Submit → copy(isSubmitted = true)
-    // GỢI Ý: Dùng when (action) { is UpdateFirstName → ... }
     return when (action) {
+        is FormAction.UpdateFirstName -> state.copy(firstName = action.value, firstNameError = null)
+        is FormAction.UpdateLastName -> state.copy(lastName = action.value, lastNameError = null)
+        is FormAction.UpdateBirthYear -> state.copy(birthYear = action.value)
+        is FormAction.UpdateEmail -> state.copy(email = action.value, emailError = null)
+        is FormAction.UpdatePhone -> state.copy(phone = action.value, phoneError = null)
+        is FormAction.UpdateCity -> state.copy(city = action.value)
+        is FormAction.UpdateNewsletter -> state.copy(receiveNewsletter = action.enabled)
+        is FormAction.UpdateNotifications -> state.copy(receiveNotifications = action.enabled)
+        is FormAction.UpdateLanguage -> state.copy(preferredLanguage = action.language)
+
         is FormAction.NextStep -> {
-            var currentStep = state.currentStep
-            if (currentStep < state.totalSteps - 1) {
-                currentStep++
+            val validatedState = validateCurrentStep(state)
+            if (!validatedState.hasCurrentStepErrors) {
+                validatedState.copy(currentStep = (state.currentStep + 1).coerceAtMost(state.totalSteps - 1))
+            } else {
+                validatedState
             }
-            state.copy(currentStep = currentStep)
         }
 
         is FormAction.PrevStep -> {
-            var currentStep = state.currentStep
-            if (currentStep > 0) {
-                currentStep--
-            }
-            state.copy(currentStep = currentStep)
+            state.copy(currentStep = (state.currentStep - 1).coerceAtLeast(0))
         }
 
-        else -> {
-            state
+        is FormAction.Submit -> {
+            val validatedState = validateCurrentStep(state)
+            if (!validatedState.hasCurrentStepErrors) {
+                validatedState.copy(isSubmitted = true)
+            } else {
+                validatedState
+            }
         }
     }
 }
 
 private fun validateCurrentStep(state: FormState): FormState {
-    // TODO: Validate dựa theo currentStep:
-    // - Step 0: kiểm tra firstName và lastName không blank
-    // - Step 1: kiểm tra email có "@", phone.length >= 9
-    // - Các step khác: không cần validate
-    // Trả về state.copy(xFirstNameError, lastNameError, emailError, phoneError)
-    TODO("Not yet implemented")
+    return when (state.currentStep) {
+        0 -> {
+            val firstNameError = if (state.firstName.isBlank()) "Không được để trống" else null
+            val lastNameError = if (state.lastName.isBlank()) "Không được để trống" else null
+            state.copy(
+                firstNameError = firstNameError,
+                lastNameError = lastNameError
+            )
+        }
+
+        1 -> {
+            val emailError = if (!state.email.contains("@")) "Email không đúng định dạng" else null
+            val phoneError =
+                if (state.phone.length < 9) "Số điện thoại phải có ít nhất 9 số" else null
+            state.copy(
+                emailError = emailError,
+                phoneError = phoneError
+            )
+        }
+
+        else -> state
+    }
 }
 
 private val FormState.hasCurrentStepErrors: Boolean
-    get() = false  // TODO: Trả về true nếu step hiện tại có lỗi
+    get() = when (currentStep) {
+        0 -> firstNameError != null || lastNameError != null
+        1 -> emailError != null || phoneError != null
+        else -> false
+    }
 
 // ─── Host Composable (Stateful) ───────────────────────────────────────────────
 
@@ -198,27 +255,27 @@ private val FormState.hasCurrentStepErrors: Boolean
  */
 @Composable
 fun MultiStepFormScreen(modifier: Modifier = Modifier) {
-    // TODO: Implement MultiStepFormScreen
-    // 1. var formState by remember { mutableStateOf(FormState()) }
-    // 2. val onAction: (FormAction) -> Unit = { action → formState = reduceFormState(formState, action) }
-    // 3. Kiểm tra formState.isSubmitted:
-    //    → true: SubmissionSuccessScreen(formState)
-    //    → false: FormContent(formState, onAction)
     var formState by remember { mutableStateOf(FormState()) }
-    val onAction: (FormAction) -> Unit =
-        { action -> formState = reduceFormState(formState, action) }
+    val onAction: (FormAction) -> Unit = { action ->
+        formState = reduceFormState(formState, action)
+    }
+
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(colorResource(R.color.bg_page))
     ) {
-        FormContent(
-            state = formState,
-            onAction = onAction,
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = colorResource(R.color.bg_page))
-        )
+        if (formState.isSubmitted) {
+            SubmissionSuccessScreen(formState = formState)
+        } else {
+            FormContent(
+                state = formState,
+                onAction = onAction,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = colorResource(R.color.bg_page))
+            )
+        }
     }
 }
 
@@ -237,22 +294,6 @@ private fun FormContent(
     onAction: (FormAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // TODO: Implement FormContent
-    // - Column(fillMaxSize, padding=16.dp)
-    // - FormHeader(state)
-    // - Spacer(16.dp)
-    // - LinearProgressIndicator(progress = state.progress, fillMaxWidth)
-    // - Spacer(4.dp) + Text "Step ${currentStep+1} of ${totalSteps}: ${stepTitle}" (primary)
-    // - Spacer(24.dp)
-    // - AnimatedContent(targetState = state.currentStep,
-    //       transitionSpec = { // slide từ phải vào nếu đi tới, từ trái vào nếu đi lùi
-    //           val direction = if (targetState > initialState) 1 else -1
-    //           slideInHorizontally { it * direction } togetherWith slideOutHorizontally { it * -direction }
-    //       },
-    //       modifier = Modifier.weight(1f)
-    //   ) { step → when(step) { 0 → PersonalInfoStep, 1 → ContactStep, 2 → PreferencesStep, 3 → ReviewStep } }
-    // - FormNavigationButtons(state, onAction)
-
     Scaffold(
         modifier = modifier,
         bottomBar = {
@@ -270,7 +311,7 @@ private fun FormContent(
                     .padding(20.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                FormHeader()
+                FormHeader(state)
                 Spacer(modifier = Modifier.size(16.dp))
                 LinearProgressIndicator(
                     progress = { state.progress },
@@ -289,6 +330,33 @@ private fun FormContent(
                     fontSize = 12.sp
                 )
                 Spacer(modifier = Modifier.size(24.dp))
+                AnimatedContent(
+                    targetState = state.currentStep,
+                    transitionSpec = { // slide từ phải vào nếu đi tới, từ trái vào nếu đi lùi
+                        val direction = if (targetState > initialState) 1 else -1
+                        slideInHorizontally { it * direction } togetherWith slideOutHorizontally { it * -direction }
+                    },
+                    modifier = Modifier.weight(1f)
+                ) { step ->
+                    when (step) {
+                        0 -> PersonalInfoStep(
+                            state = state,
+                            onAction = onAction
+                        )
+
+                        1 -> ContactStep(
+                            state = state,
+                            onAction = onAction
+                        )
+
+                        2 -> PreferencesStep(
+                            state = state,
+                            onAction = onAction
+                        )
+
+                        3 -> ReviewStep(state = state)
+                    }
+                }
             }
         }
     }
@@ -298,15 +366,13 @@ private fun FormContent(
 
 @Composable
 private fun FormHeader(
-//    state: FormState,
+    state: FormState,
     modifier: Modifier = Modifier,
 ) {
-    // TODO: Implement FormHeader
-    // - Column: Text "Registration Form" (headlineMedium) + Text subtitle (bodyMedium, onSurfaceVariant)
     Box {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.Default.ArrowBackIosNew,
                 contentDescription = null,
                 tint = colorResource(R.color.text_primary)
             )
@@ -329,12 +395,52 @@ private fun PersonalInfoStep(
     onAction: (FormAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // TODO: Implement PersonalInfoStep
-    // - Column(fillMaxSize, verticalScroll, spacedBy=12.dp)
-    // - ValidatedTextField firstName (error = state.firstNameError)
-    // - ValidatedTextField lastName (error = state.lastNameError)
-    // - OutlinedTextField birthYear (optional, keyboardType = Number)
-    Box {}
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = modifier.verticalScroll(scrollState),
+        verticalArrangement = Arrangement.spacedBy(15.dp)
+    ) {
+        ValidatedTextField(
+            value = state.firstName,
+            onValueChange = { onAction(FormAction.UpdateFirstName(it)) },
+            label = "First Name",
+            errorMessage = state.firstNameError,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    null,
+                    tint = Color.Black
+                )
+            }
+        )
+        ValidatedTextField(
+            value = state.lastName,
+            onValueChange = { onAction(FormAction.UpdateLastName(it)) },
+            label = "Last Name",
+            errorMessage = state.lastNameError,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    null,
+                    tint = Color.Black
+                )
+            }
+        )
+        ValidatedTextField(
+            value = state.birthYear,
+            onValueChange = { onAction(FormAction.UpdateBirthYear(it)) },
+            label = "Birth Year",
+            errorMessage = null,
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Cake,
+                    null,
+                    tint = Color.Black
+                )
+            },
+            keyboardType = KeyboardType.Number
+        )
+    }
 }
 
 // ─── Step 2: Contact ──────────────────────────────────────────────────────────
@@ -345,12 +451,38 @@ private fun ContactStep(
     onAction: (FormAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // TODO: Implement ContactStep
-    // - Column(fillMaxSize, verticalScroll, spacedBy=12.dp)
-    // - ValidatedTextField email (error = emailError, keyboardType = Email)
-    // - ValidatedTextField phone (error = phoneError, keyboardType = Phone)
-    // - OutlinedTextField city (optional)
-    Box {}
+    val scrollState = rememberScrollState()
+    Column(modifier = modifier.verticalScroll(scrollState)) {
+        ValidatedTextField(
+            value = state.email,
+            onValueChange = { onAction(FormAction.UpdateEmail(it)) },
+            label = "Email",
+            errorMessage = state.emailError,
+            leadingIcon = {
+                Icon(imageVector = Icons.Default.Email, null)
+            },
+            keyboardType = KeyboardType.Email
+        )
+        ValidatedTextField(
+            value = state.phone,
+            onValueChange = { onAction(FormAction.UpdatePhone(it)) },
+            label = "Phone",
+            errorMessage = state.phoneError,
+            leadingIcon = {
+                Icon(imageVector = Icons.Default.Phone, null)
+            },
+            keyboardType = KeyboardType.Phone
+        )
+        ValidatedTextField(
+            value = state.city,
+            onValueChange = { onAction(FormAction.UpdateCity(it)) },
+            label = "City",
+            errorMessage = null,
+            leadingIcon = {
+                Icon(imageVector = Icons.Default.LocationCity, null)
+            }
+        )
+    }
 }
 
 // ─── Step 3: Preferences ─────────────────────────────────────────────────────
@@ -361,16 +493,49 @@ private fun PreferencesStep(
     onAction: (FormAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // TODO: Implement PreferencesStep
-    // - Column(fillMaxSize, verticalScroll, spacedBy=16.dp)
-    // - SwitchRow "Receive newsletter" (receiveNewsletter)
-    // - SwitchRow "Push notifications" (receiveNotifications)
-    // - HorizontalDivider
-    // - Text "Preferred language"
-    // - listOf("Vietnamese", "English", "Japanese", "Korean").forEach { lang →
-    //     Row: RadioButton(selected = state.preferredLanguage == lang, onClick = ...) + Text lang
-    //   }
-    Box {}
+    Column(
+        modifier = modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        SwitchRow(
+            label = "Receive newsletter",
+            checked = state.receiveNewsletter,
+            onCheckedChange = { onAction(FormAction.UpdateNewsletter(it)) }
+        )
+        SwitchRow(
+            label = "Push notifications",
+            checked = state.receiveNotifications,
+            onCheckedChange = { onAction(FormAction.UpdateNotifications(it)) }
+        )
+        HorizontalDivider()
+        Text(
+            text = "Preferred language",
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.Black
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf("Vietnamese", "English", "Japanese", "Korean").forEach { lang ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    RadioButton(
+                        selected = state.preferredLanguage == lang,
+                        onClick = { onAction(FormAction.UpdateLanguage(lang)) },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = colorResource(R.color.primary_blue),
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = lang,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Black
+                    )
+                }
+            }
+        }
+    }
 }
 
 // ─── Step 4: Review ───────────────────────────────────────────────────────────
@@ -380,14 +545,39 @@ private fun ReviewStep(
     state: FormState,
     modifier: Modifier = Modifier,
 ) {
-    // TODO: Implement ReviewStep
-    // - Column(fillMaxSize, verticalScroll, spacedBy=16.dp)
-    // - Text "Review your information" (titleMedium)
-    // - ReviewSection("Personal Info") { ReviewRow("Name", ...) + ReviewRow("Birth Year", ...) }
-    // - ReviewSection("Contact") { email, phone, city }
-    // - ReviewSection("Preferences") { newsletter, notifications, language }
-    // - Text "Nhấn Submit để hoàn tất" (bodySmall, onSurfaceVariant)
-    Box {}
+    Column(
+        modifier = modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Review your information",
+            style = MaterialTheme.typography.titleMedium,
+            color = colorResource(R.color.text_primary)
+        )
+
+        ReviewSection("Personal Info") {
+            ReviewRow("Name", "${state.firstName} ${state.lastName}")
+            ReviewRow("Birth Year", state.birthYear)
+        }
+
+        ReviewSection("Contact") {
+            ReviewRow("Email", state.email)
+            ReviewRow("Phone", state.phone)
+            ReviewRow("City", state.city)
+        }
+
+        ReviewSection("Preferences") {
+            ReviewRow("Newsletter", if (state.receiveNewsletter) "Yes" else "No")
+            ReviewRow("Notifications", if (state.receiveNotifications) "Yes" else "No")
+            ReviewRow("Language", state.preferredLanguage)
+        }
+
+        Text(
+            text = "Nhấn Submit để hoàn tất",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.DarkGray
+        )
+    }
 }
 
 @Composable
@@ -396,9 +586,24 @@ private fun ReviewSection(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    // TODO: Implement ReviewSection
-    // - Card(fillMaxWidth, surfaceVariant color) { Column(padding=12.dp) { Text title + content() } }
-    Box {}
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+            content()
+        }
+    }
 }
 
 @Composable
@@ -407,9 +612,21 @@ private fun ReviewRow(
     value: String,
     modifier: Modifier = Modifier,
 ) {
-    // TODO: Implement ReviewRow
-    // - Row(fillMaxWidth, SpaceBetween): Text label (onSurfaceVariant) + Text value (Medium)
-    Box {}
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium
+        )
+    }
 }
 
 // ─── Navigation Buttons ───────────────────────────────────────────────────────
@@ -420,52 +637,60 @@ private fun FormNavigationButtons(
     onAction: (FormAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // TODO: Implement FormNavigationButtons
-    // - val isLastStep = state.currentStep == state.totalSteps - 1
-    // - Row(fillMaxWidth, spacedBy=12.dp, padding top=16.dp)
-    // - Nếu currentStep > 0: OutlinedButton "Back" (weight(1f)) → onAction(PrevStep)
-    // - Button "Next" hoặc "Submit" (weight(1f)) → onAction(NextStep) hoặc onAction(Submit)
+    val isLastStep = state.currentStep == state.totalSteps - 1
+
     Surface(
         color = Color.White,
-        modifier = Modifier.shadow(8.dp)
+        modifier = modifier.shadow(8.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            OutlinedButton(
-                onClick = { onAction.invoke(FormAction.PrevStep) },
+            if (state.currentStep > 0) {
+                OutlinedButton(
+                    onClick = { onAction(FormAction.PrevStep) },
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.weight(1f),
+                    border = BorderStroke(
+                        width = 1.dp,
+                        colorResource(R.color.border_strong)
+                    ),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = colorResource(R.color.text_secondary)
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = "Trước")
+                }
+            }
+
+            Button(
+                onClick = {
+                    if (isLastStep) {
+                        onAction(FormAction.Submit)
+                    } else {
+                        onAction(FormAction.NextStep)
+                    }
+                },
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.weight(1f),
-                border = BorderStroke(
-                    width = 1.dp,
-                    colorResource(R.color.border_strong)
-                ),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = colorResource(R.color.text_secondary)
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = null
-                )
-                Text(text = "Trước")
-            }
-            Spacer(modifier = Modifier.size(20.dp))
-            Button(
-                onClick = { onAction.invoke(FormAction.NextStep) },
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier.weight(2f),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colorResource(R.color.primary_blue),
                     contentColor = Color.White
                 )
             ) {
-                Text(text = "Sau")
+                Text(text = if (isLastStep) "Submit" else "Sau")
+                Spacer(modifier = Modifier.width(4.dp))
                 Icon(
-                    imageVector = Icons.Default.ArrowForward,
+                    imageVector = if (isLastStep) Icons.Default.Check else Icons.Default.ArrowForward,
                     contentDescription = null
                 )
             }
@@ -481,13 +706,50 @@ private fun ValidatedTextField(
     onValueChange: (String) -> Unit,
     label: String,
     errorMessage: String?,
+    leadingIcon: @Composable (() -> Unit),
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
 ) {
-    // TODO: Implement ValidatedTextField
-    // - OutlinedTextField với isError = errorMessage != null
-    // - supportingText = errorMessage?.let { { Text(it) } }
-    Box {}
+    val isError = !errorMessage.isNullOrBlank()
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        Text(text = label, color = Color.DarkGray)
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = {
+                Text(text = label, color = Color.DarkGray.copy(alpha = 0.4f))
+            },
+            leadingIcon = leadingIcon,
+            isError = isError,
+            supportingText = {
+                if (isError) {
+                    Text(text = errorMessage, color = Color.Red)
+                }
+            },
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                errorBorderColor = colorResource(R.color.error_red),
+                errorContainerColor = colorResource(R.color.error_red_light),
+                errorLeadingIconColor = colorResource(R.color.error_red),
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                errorTextColor = colorResource(R.color.error_red),
+                focusedBorderColor = Color.Black,
+                unfocusedBorderColor = Color.Black.copy(alpha = 0.4f),
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black
+            ),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable
@@ -497,10 +759,29 @@ private fun SwitchRow(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // TODO: Implement SwitchRow
-    // - Row(fillMaxWidth, SpaceBetween, CenterVertically)
-    // - Text label (bodyLarge) + Switch(checked, onCheckedChange)
-    Box {}
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.Black
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = colorResource(R.color.primary_blue),
+                checkedBorderColor = Color.Transparent,
+                uncheckedThumbColor = Color.White,
+                uncheckedTrackColor = colorResource(R.color.uncheck_track),
+                uncheckedBorderColor = Color.Transparent
+            )
+        )
+    }
 }
 
 // ─── Success Screen ───────────────────────────────────────────────────────────
@@ -510,17 +791,51 @@ private fun SubmissionSuccessScreen(
     formState: FormState,
     modifier: Modifier = Modifier,
 ) {
-    // TODO: Implement SubmissionSuccessScreen
-    // - Column(fillMaxSize, padding=32.dp, Center, CenterHorizontally)
-    // - Surface icon (80dp, extraLarge, primaryContainer) { Box(Center) { Icon(Check, 48dp) } }
-    // - Spacer(24.dp) + Text "Registration Complete!" (headlineMedium)
-    // - Spacer(8.dp) + Text "Welcome, ${firstName} ${lastName}!" (bodyLarge, onSurfaceVariant)
-    Box {}
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Surface(
+            modifier = Modifier.size(80.dp),
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.primaryContainer
+        ) {
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Registration Complete!",
+            style = MaterialTheme.typography.headlineMedium,
+            color = colorResource(R.color.primary_blue).copy(alpha = 5f)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Welcome, ${formState.firstName} ${formState.lastName}!",
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.Black.copy(alpha = 0.5f)
+        )
+    }
 }
 
 // ─── Previews ─────────────────────────────────────────────────────────────────
 
-//@Preview(showBackground = true, name = "Multi Step Form - Light")
+@Preview(showBackground = true, name = "Multi Step Form - Light")
 @Composable
 private fun MultiStepFormPreview() {
     AppTheme {
@@ -560,7 +875,7 @@ private fun ReviewStepPreview() {
     }
 }
 
-//@Preview(showBackground = true, name = "Success Screen Preview")
+@Preview(showBackground = true, name = "Success Screen Preview")
 @Composable
 private fun SuccessScreenPreview() {
     AppTheme {
@@ -583,7 +898,67 @@ private fun HeaderPreview() {
         receiveNewsletter = true,
         receiveNotifications = true,
         preferredLanguage = "Vietnamese",
-        currentStep = 3,
+        currentStep = 0,
     )
-    FormHeader()
+    FormHeader(sampleState)
+}
+
+@Preview(showBackground = true, name = "Validated Text Field - No Error")
+@Composable
+private fun ValidatedTextFieldPreview() {
+    AppTheme {
+        ValidatedTextField(
+            value = "John Doe",
+            onValueChange = {},
+            label = "First Name",
+            errorMessage = null,
+            leadingIcon = { Icon(imageVector = Icons.Default.Check, contentDescription = null) }
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Validated Text Field - Error")
+@Composable
+private fun ValidatedTextFieldErrorPreview() {
+    AppTheme {
+        ValidatedTextField(
+            value = "aa",
+            onValueChange = {},
+            label = "First Name",
+            errorMessage = "First name is required",
+            leadingIcon = { Icon(imageVector = Icons.Default.Check, contentDescription = null) }
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Personal Info Step Preview")
+@Composable
+private fun PersonalInfoStepPreview() {
+    AppTheme {
+        val sampleState = FormState(
+            firstName = "John",
+            lastName = "Doe",
+            birthYear = "1995"
+        )
+        PersonalInfoStep(
+            state = sampleState,
+            onAction = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Contact Step Preview")
+@Composable
+private fun ContactStepPreview() {
+    AppTheme {
+        val sampleState = FormState(
+            email = "john.doe@example.com",
+            phone = "0123456789",
+            city = "Ho Chi Minh City"
+        )
+        ContactStep(
+            state = sampleState,
+            onAction = {}
+        )
+    }
 }
