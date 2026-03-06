@@ -1,9 +1,16 @@
 package com.apero.composetraining.session1.exercises
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.apero.composetraining.common.AppTheme
@@ -29,25 +36,87 @@ fun ProfileScreen() {
         // === HEADER ===
         // TODO: [Session 1] Bài tập 3 - Tạo header với Avatar (80dp, CircleShape) + Column(Name, "Edit Profile" button)
         // Gợi ý: Row(verticalAlignment = Alignment.CenterVertically)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(12.dp)
+                )
+            }
 
+            Column() {
+                Text(
+                    text = "Thang Nguyen Quang",
+                    fontWeight = FontWeight.Bold
+                )
+                Button(onClick = {}) {
+                    Text(text = "Edit Profile")
+                }
+            }
+        }
         Spacer(modifier = Modifier.height(24.dp))
 
         // === STATS ROW ===
         // TODO: [Session 1] Bài tập 3 - Tạo Row với 3 cột: Posts (128) | Followers (1.2K) | Following (380)
         // Gợi ý: Mỗi cột là Column(horizontalAlignment = CenterHorizontally, modifier = Modifier.weight(1f))
         // Số to + bold, label nhỏ + màu nhạt
-
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            DetailProfile(data = "Posts (128)", modifier = Modifier.weight(1f))
+            DetailProfile(data = "Followers (1.2K)", modifier = Modifier.weight(1f))
+            DetailProfile(data = "Following (380)", modifier = Modifier.weight(1f))
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
         // === BIO ===
         // TODO: [Session 1] Bài tập 3 - Thêm Text bio nhiều dòng
         // Ví dụ: "Android Developer 📱\nLover of clean code ✨\nHà Nội, Việt Nam 🇻🇳"
-
+        Text("Android Developer \nLover of clean code\nHà Nội, Việt Nam")
         Spacer(modifier = Modifier.height(24.dp))
 
         // === ACTION BUTTONS ===
         // TODO: [Session 1] Bài tập 3 - Tạo Row chứa 2 button ngang hàng: "Message" (Outlined) + "Follow" (Filled)
         // Gợi ý: Dùng Modifier.weight(1f) cho mỗi button, spacedBy(8.dp) cho Row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Message")
+            }
+
+            Button(
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Follow")
+            }
+        }
+    }
+}
+
+@Composable
+fun DetailProfile(data: String, modifier: Modifier = Modifier) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
+        Text(text = data)
     }
 }
 
