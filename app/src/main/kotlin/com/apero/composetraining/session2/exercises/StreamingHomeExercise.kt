@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -67,7 +68,8 @@ data class Movie(
     val genre: String,
     val emoji: String,
     val rating: String,
-    val color: Color = Color(0xFF1E1E2E)
+    val color: Color = Color(0xFF1E1E2E),
+    val category: String = "Movies",
 )
 
 data class MovieSection(
@@ -89,9 +91,9 @@ private val movieSections = listOf(
     MovieSection(
         title = "🔥 Trending Now",
         movies = listOf(
-            Movie("The Matrix", "Sci-Fi", "💊", "8.7", Color(0xFF0D2818)),
+            Movie("The Matrix", "Sci-Fi", "💊", "8.7", Color(0xFF0D2818), "Series"),
             Movie("Dune", "Epic", "🏜️", "8.0", Color(0xFF2D1B00)),
-            Movie("Interstellar", "Space", "🌌", "8.6", Color(0xFF000D1A)),
+            Movie("Interstellar", "Space", "🌌", "8.6", Color(0xFF000D1A), "Series"),
             Movie("Blade Runner", "Neo-noir", "🤖", "8.1", Color(0xFF1A0000)),
             Movie("Tenet", "Action", "⏰", "7.4", Color(0xFF001A2D))
         )
@@ -100,14 +102,14 @@ private val movieSections = listOf(
         title = "▶ Continue Watching",
         movies = listOf(
             Movie("Pulp Fiction", "Crime", "🎬", "8.9", Color(0xFF1A0D00)),
-            Movie("Dark Knight", "Action", "🦇", "9.0", Color(0xFF0D0D0D)),
+            Movie("Dark Knight", "Action", "🦇", "9.0", Color(0xFF0D0D0D), "Series"),
             Movie("Parasite", "Thriller", "🏠", "8.5", Color(0xFF0D1A0D))
         )
     ),
     MovieSection(
         title = "🎭 Because you watched Inception",
         movies = listOf(
-            Movie("Shutter Island", "Mystery", "🏝️", "8.1", Color(0xFF0D1A2D)),
+            Movie("Shutter Island", "Mystery", "🏝️", "8.1", Color(0xFF0D1A2D), "Series"),
             Movie("Prestige", "Drama", "🎩", "8.5", Color(0xFF1A1A0D)),
             Movie("Memento", "Thriller", "📸", "8.4", Color(0xFF2D0D0D)),
             Movie("Fight Club", "Drama", "🥊", "8.8", Color(0xFF1A0D1A))
@@ -122,7 +124,6 @@ private val categories = listOf("All", "Movies", "Series", "Anime", "Documentary
 /**
  * Streaming Home Screen
  *
- * TODO: [Buổi 2 — Nested Scroll] Cấu trúc chính xác:
  *
  * Column(                                     ← Outer vertical scroll
  *     modifier = Modifier.verticalScroll(...)
@@ -145,50 +146,113 @@ private val categories = listOf("All", "Movies", "Series", "Anime", "Documentary
  */
 @Composable
 fun StreamingHomeScreen(modifier: Modifier = Modifier) {
-    // TODO: Implement StreamingHomeScreen
-    // - rememberScrollState() cho outer scroll
-    // - var selectedCategory by remember { mutableStateOf("All") }
-    // - Column với fillMaxSize + verticalScroll(scrollState) + background(Color(0xFF0D0D0D))
-    //   → HeroBanner(featuredMovie)
-    //   → Spacer(16.dp)
-    //   → CategoryChipRow(categories, selectedCategory, onCategorySelect)
-    //   → Spacer(24.dp)
-    //   → movieSections.forEach { section → MovieSection(section) + Spacer(24.dp) }
-    //   → Spacer(80.dp) ← space cho FAB
-    Box {}
+    val scrollState = rememberScrollState()
+    var selectedCategory by remember { mutableStateOf("All") }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .background(Color(0xFF0D0D0D))
+    ) {
+        HeroBanner(featuredMovie)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        CategoryChipRow(
+            categories = categories,
+            selectedCategory = selectedCategory,
+            onCategorySelect = { selectedCategory = it }
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        movieSections.forEach { section ->
+            MovieSection(section = section, selectedCategory = selectedCategory)
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        Spacer(modifier = Modifier.height(80.dp))
+    }
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
-
-/**
- * Hero Banner — Box với gradient text overlay
- *
- * TODO: [Buổi 2 — Box] Cấu trúc:
- * Box(fillMaxWidth, height=280.dp) {
- *     Box(fillMaxSize, background = movie.color) {   ← Background poster
- *         Text emoji (80.sp, Alignment.Center)
- *     }
- *     Box(fillMaxSize, background = Brush.verticalGradient) ← Dark overlay
- *     Column(Alignment.BottomStart, padding=16.dp) { ← Content
- *         Text title + Text genre + Row buttons
- *     }
- * }
- */
 @Composable
 fun HeroBanner(
     movie: Movie,
     modifier: Modifier = Modifier
 ) {
-    // TODO: Implement HeroBanner
-    // - Box với fillMaxWidth + height(280.dp)
-    // - Lớp 1: Box nền với movie.color + emoji ở giữa
-    // - Lớp 2: Box overlay với Brush.verticalGradient (Transparent → Black.alpha0.3 → Black.alpha0.9)
-    // - Lớp 3: Column (align = BottomStart, padding = 16.dp):
-    //   → Text movie.title (headlineMedium, Bold, White)
-    //   → Text "${genre} · ⭐ ${rating}" (bodyMedium, White.alpha0.8)
-    //   → Spacer(12.dp)
-    //   → Row buttons: Button "▶ Watch" (White bg) + OutlinedButton "+ My List"
-    Box {}
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(280.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(movie.color),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = movie.emoji,
+                fontSize = 80.sp
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.3f),
+                            Color.Black.copy(alpha = 0.9f)
+                        )
+                    )
+                )
+        )
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = movie.title,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Text(
+                text = "${movie.genre} · ${movie.rating} star",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.8f)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = { },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Text("Watch")
+                }
+                OutlinedButton(
+                    onClick = { },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("+ My List")
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -198,27 +262,48 @@ fun CategoryChipRow(
     onCategorySelect: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // TODO: Implement CategoryChipRow
-    // - Row với horizontalScroll(rememberScrollState()) + padding(horizontal=16.dp)
-    // - horizontalArrangement = spacedBy(8.dp)
-    // - Với mỗi category: FilterChip(selected, onClick, label)
-    // GỢI Ý: Row(horizontalScroll) nhẹ hơn LazyRow cho list ngắn (<10 items)
-    Box {}
+    Row(
+        modifier = modifier
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        categories.forEach { category ->
+            FilterChip(
+                selected = category == selectedCategory,
+                onClick = { onCategorySelect(category) },
+                label = { Text(category) }
+            )
+        }
+    }
 }
 
 @Composable
 fun MovieSection(
     section: MovieSection,
+    selectedCategory: String,
     modifier: Modifier = Modifier
 ) {
-    // TODO: Implement MovieSection
-    // - Column:
-    //   → Text section.title (titleMedium, Bold, White, padding horizontal=16dp vertical=8dp)
-    //   → Row với horizontalScroll(rememberScrollState()) + padding(horizontal=16.dp) + spacedBy(12.dp)
-    //   → Mỗi movie: MovieCard(movie)
-    // GỢI Ý: Tại sao KHÔNG dùng LazyRow ở đây?
-    // → Nested Lazy với cùng hướng scroll → crash. Khác hướng thì OK.
-    Box {}
+    Column(modifier = modifier) {
+        Text(
+            text = section.title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            section.movies.filter { selectedCategory == "All" || it.category == selectedCategory  }
+                .forEach { movie ->
+                    MovieCard(movie = movie)
+                }
+        }
+    }
 }
 
 @Composable
@@ -226,12 +311,53 @@ fun MovieCard(
     movie: Movie,
     modifier: Modifier = Modifier
 ) {
-    // TODO: Implement MovieCard
-    // - Box với width(120.dp) + height(160.dp) + clip(RoundedCornerShape(8.dp)) + background(movie.color)
-    // - Text emoji (40.sp, align = Center)
-    // - Box overlay gradient ở BottomCenter (Transparent → Black.alpha0.8)
-    //   + Column bên trong: Text title (labelSmall, Bold, White) + Text "⭐ ${rating}" (labelSmall, White.alpha0.7)
-    Box {}
+    Box(
+        modifier = modifier
+            .width(120.dp)
+            .height(160.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(movie.color)
+    ) {
+        Text(
+            text = movie.emoji,
+            fontSize = 40.sp,
+            modifier = Modifier.align(Alignment.Center)
+        )
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .height(60.dp)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.8f)
+                        )
+                    )
+                )
+        ) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = movie.title,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    maxLines = 2
+                )
+                Text(
+                    text = "⭐ ${movie.rating}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
 }
 
 // ─── Preview ─────────────────────────────────────────────────────────────────
