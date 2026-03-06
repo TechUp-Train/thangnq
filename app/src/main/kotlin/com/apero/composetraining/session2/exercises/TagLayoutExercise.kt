@@ -49,27 +49,60 @@ import com.apero.composetraining.common.AppTheme
  */
 
 // TODO: [Session 2] Bài tập 4 - Implement TagsLayout composable dùng Layout
-// @Composable
-// fun TagsLayout(
-//     tags: List<String>,
-//     modifier: Modifier = Modifier
-// ) {
-//     Layout(
-//         content = {
-//             tags.forEach { tag ->
-//                 // Render từng tag thành AssistChip hoặc SuggestionChip
-//                 SuggestionChip(onClick = {}, label = { Text(tag) })
-//             }
-//         },
-//         modifier = modifier
-//     ) { measurables, constraints ->
-//         // TODO: implement MeasurePolicy
-//         // 1. Measure tất cả placeables
-//         // 2. Tính vị trí (x, y) của từng placeable (wrap khi hết width)
-//         // 3. Tính tổng height
-//         // 4. layout(maxWidth, totalHeight) { place mỗi placeable }
-//     }
-// }
+@Composable
+fun TagsLayout(
+    tags: List<String>,
+    modifier: Modifier = Modifier
+) {
+    Layout(
+        modifier = modifier,
+        content = {
+            tags.forEach { tag ->
+                SuggestionChip(
+                    onClick = {},
+                    label = { Text(tag) }
+                )
+            }
+        }
+    ) { measurables, constraints ->
+        val placeables = measurables.map { it.measure(constraints.copy(minWidth = 0)) }
+        val gap = 8.dp.roundToPx()
+        var x = 0
+        var y = 0
+        var rowHeight = 0
+        
+        for (placeable in placeables) {
+            if (x + placeable.width > constraints.maxWidth && x > 0) {
+                x = 0
+                y += rowHeight + gap
+                rowHeight = 0
+            }
+            rowHeight = maxOf(rowHeight, placeable.height)
+            x += placeable.width + gap
+        }
+        
+        val totalHeight = y + rowHeight
+
+        layout(width = constraints.maxWidth, height = totalHeight) {
+            var currentX = 0
+            var currentY = 0
+            var currentRowHeight = 0
+            
+            placeables.forEach { placeable ->
+                if (currentX + placeable.width > constraints.maxWidth && currentX > 0) {
+                    currentX = 0
+                    currentY += currentRowHeight + gap
+                    currentRowHeight = 0
+                }
+                
+                placeable.placeRelative(x = currentX, y = currentY)
+                
+                currentRowHeight = maxOf(currentRowHeight, placeable.height)
+                currentX += placeable.width + gap
+            }
+        }
+    }
+}
 
 @Composable
 fun TagLayoutScreen() {
@@ -115,6 +148,8 @@ fun TagLayoutScreen() {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        TagsLayout(tags = tags)
     }
 }
 
