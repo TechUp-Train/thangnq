@@ -1,14 +1,20 @@
 package com.apero.composetraining.session5.exercises
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
 import com.apero.composetraining.common.AppTheme
-// TODO: Thêm imports Nav3
+import kotlinx.serialization.Serializable
+
 // import androidx.navigation3.runtime.NavKey
 // import androidx.navigation3.runtime.entryProvider
 // import androidx.navigation3.runtime.rememberNavBackStack
@@ -57,49 +63,65 @@ import com.apero.composetraining.common.AppTheme
  * - Logout clear stack (không còn back về Home sau logout)
  */
 
-// TODO: [Session 5] Bài tập 1 - Định nghĩa type-safe keys
-// @Serializable
-// data object WelcomeKey : NavKey
-//
-// @Serializable
-// data object HomeKey : NavKey
+@Serializable
+data object WelcomeKey : NavKey
 
-// TODO: [Session 5] Bài tập 1 - Implement TwoScreenFlowApp
+@Serializable
+data object HomeKey : NavKey
+
 @Composable
 fun TwoScreenFlowApp() {
-    // TODO: Tạo back stack
-    // val backStack = rememberNavBackStack(WelcomeKey)
+    val backstack = rememberNavBackStack(WelcomeKey)
 
-    // TODO: NavDisplay với entryProvider cho 2 screens
-    // NavDisplay(
-    //     backStack = backStack,
-    //     onBack = { backStack.removeLastOrNull() },
-    //     entryProvider = entryProvider {
-    //         entry<WelcomeKey> { ... }
-    //         entry<HomeKey> { ... }
-    //     }
-    // )
+    NavDisplay(
+        backStack = backstack,
+        onBack = { backstack.removeLastOrNull() },
+        entryProvider = entryProvider {
+            entry<WelcomeKey> {
+                WelcomeScreen(
+                    onGetStarted = {
+                        backstack.add(HomeKey)
+                    }
+                )
+            }
+            entry<HomeKey> {
+                HomeScreen(
+                    onLogout = {
+                        backstack.clear()
+                        backstack.add(WelcomeKey)
+                    }
+                )
+            }
+        }
+    )
+}
 
-    // Placeholder — xóa khi implement
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("TODO: Implement 2-Screen Flow với Navigation 3")
+@Composable
+fun WelcomeScreen(onGetStarted: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Text("Chào mừng đến với Compose!", modifier = Modifier.padding(16.dp))
+        Button(onClick = onGetStarted) {
+            Text(text = "Bắt đầu")
+        }
     }
 }
 
-// TODO: [Session 5] Bài tập 1 - WelcomeScreen
-// Params: onGetStarted: () -> Unit
-// UI: Column centered, Text "👋 Chào mừng đến với Compose!", Button "Bắt đầu"
-@Composable
-fun WelcomeScreen(onGetStarted: () -> Unit) {
-    // TODO
-}
-
-// TODO: [Session 5] Bài tập 1 - HomeScreen
-// Params: onLogout: () -> Unit
-// UI: Column centered, Text "🏠 Trang chủ", OutlinedButton "Đăng xuất"
 @Composable
 fun HomeScreen(onLogout: () -> Unit) {
-    // TODO
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Text("Trang chủ", modifier = Modifier.padding(16.dp))
+        Button(onClick = onLogout) {
+            Text(text = "Đăng xuất")
+        }
+    }
 }
 
 @Preview(showBackground = true)
