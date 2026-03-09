@@ -76,14 +76,14 @@ import com.apero.composetraining.common.AppTheme
  * - Navigate vào detail rồi switch tab, quay lại tab → vẫn thấy detail
  */
 
-// TODO: [Session 6] Bài tập 2 - Định nghĩa keys cho 3 tabs + detail screens
+// TODO: [Session 5] Bài tập 2 - Định nghĩa keys cho 3 tabs + detail screens
 // @Serializable data object HomeTabKey : NavKey
 // @Serializable data class ArticleDetailKey(val articleId: Int) : NavKey
 // ... thêm keys cho Explore và Profile tabs
 
-// TODO: [Session 6] Bài tập 2 - Định nghĩa enum Tab { HOME, EXPLORE, PROFILE }
+// TODO: [Session 5] Bài tập 2 - Định nghĩa enum Tab { HOME, EXPLORE, PROFILE }
 
-// TODO: [Session 6] Bài tập 2 - Implement TabAppScreen với 3 back stacks riêng
+// TODO: [Session 5] Bài tập 2 - Implement TabAppScreen với 3 back stacks riêng
 @Composable
 fun TabAppScreen() {
     // TODO: 3 back stacks
@@ -101,7 +101,7 @@ fun TabAppScreen() {
     }
 }
 
-// TODO: [Session 6] Bài tập 2 - Implement screens cho mỗi tab
+// TODO: [Session 5] Bài tập 2 - Implement screens cho mỗi tab
 // HomeTabScreen, ArticleDetailScreen, ExploreTabScreen, SearchResultScreen, ProfileTabScreen, EditProfileScreen
 
 @Preview(showBackground = true)

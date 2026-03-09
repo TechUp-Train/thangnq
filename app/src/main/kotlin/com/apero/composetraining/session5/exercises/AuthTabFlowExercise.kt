@@ -129,20 +129,20 @@ import com.apero.composetraining.common.AppTheme
  * - Logout → Auth flow (không thể back về Main)
  */
 
-// TODO: [Session 6] Bài tập 4 - Định nghĩa AuthKey sealed class
+// TODO: [Session 5] Bài tập 4 - Định nghĩa AuthKey sealed class
 // @Serializable
 // sealed class AuthKey : NavKey { ... }
 
-// TODO: [Session 6] Bài tập 4 - Định nghĩa Main keys
+// TODO: [Session 5] Bài tập 4 - Định nghĩa Main keys
 // @Serializable data object FeedKey : NavKey
 // @Serializable data class PostDetailKey(val postId: Int) : NavKey
 // ...
 
-// TODO: [Session 6] Bài tập 4 - data class UserData(val name: String, val role: String)
+// TODO: [Session 5] Bài tập 4 - data class UserData(val name: String, val role: String)
 
-// TODO: [Session 6] Bài tập 4 - enum class Tab { FEED, DISCOVER, PROFILE }
+// TODO: [Session 5] Bài tập 4 - enum class Tab { FEED, DISCOVER, PROFILE }
 
-// TODO: [Session 6] Bài tập 4 - Implement AuthTabApp (top-level: isAuthenticated state)
+// TODO: [Session 5] Bài tập 4 - Implement AuthTabApp (top-level: isAuthenticated state)
 @Composable
 fun AuthTabApp() {
     // TODO: isAuthenticated state
@@ -154,13 +154,13 @@ fun AuthTabApp() {
     }
 }
 
-// TODO: [Session 6] Bài tập 4 - AuthFlow composable
+// TODO: [Session 5] Bài tập 4 - AuthFlow composable
 // Params: onLoginSuccess: () -> Unit
 
-// TODO: [Session 6] Bài tập 4 - MainFlow composable
+// TODO: [Session 5] Bài tập 4 - MainFlow composable
 // Params: onLogout: () -> Unit
 
-// TODO: [Session 6] Bài tập 4 - Implement tất cả screen composables
+// TODO: [Session 5] Bài tập 4 - Implement tất cả screen composables
 // LoginScreen, RegisterScreen, ForgotPasswordScreen
 // FeedScreen, PostDetailScreen, DiscoverScreen, ProfileScreen, EditProfileScreen
 

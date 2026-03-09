@@ -80,17 +80,17 @@ import com.apero.composetraining.common.AppTheme
  * - Data class keys pass data đúng (categoryId, productId)
  */
 
-// TODO: [Session 6] Bài tập 3 - Định nghĩa sealed class ProductFlowKey : NavKey
+// TODO: [Session 5] Bài tập 3 - Định nghĩa sealed class ProductFlowKey : NavKey
 // @Serializable
 // sealed class ProductFlowKey : NavKey { ... }
 
-// TODO: [Session 6] Bài tập 3 - Sample data
+// TODO: [Session 5] Bài tập 3 - Sample data
 // data class Product(val id: Int, val name: String, val price: Int, val categoryId: Int)
 // data class Category(val id: Int, val name: String)
 // val sampleCategories = listOf(...)
 // val sampleProducts = listOf(...)
 
-// TODO: [Session 6] Bài tập 3 - Implement ECommerceApp
+// TODO: [Session 5] Bài tập 3 - Implement ECommerceApp
 @Composable
 fun ECommerceApp() {
     // TODO: Back stack bắt đầu từ CategoryList

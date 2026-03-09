@@ -57,14 +57,14 @@ import com.apero.composetraining.common.AppTheme
  * - Logout clear stack (không còn back về Home sau logout)
  */
 
-// TODO: [Session 6] Bài tập 1 - Định nghĩa type-safe keys
+// TODO: [Session 5] Bài tập 1 - Định nghĩa type-safe keys
 // @Serializable
 // data object WelcomeKey : NavKey
 //
 // @Serializable
 // data object HomeKey : NavKey
 
-// TODO: [Session 6] Bài tập 1 - Implement TwoScreenFlowApp
+// TODO: [Session 5] Bài tập 1 - Implement TwoScreenFlowApp
 @Composable
 fun TwoScreenFlowApp() {
     // TODO: Tạo back stack
@@ -86,7 +86,7 @@ fun TwoScreenFlowApp() {
     }
 }
 
-// TODO: [Session 6] Bài tập 1 - WelcomeScreen
+// TODO: [Session 5] Bài tập 1 - WelcomeScreen
 // Params: onGetStarted: () -> Unit
 // UI: Column centered, Text "👋 Chào mừng đến với Compose!", Button "Bắt đầu"
 @Composable
@@ -94,7 +94,7 @@ fun WelcomeScreen(onGetStarted: () -> Unit) {
     // TODO
 }
 
-// TODO: [Session 6] Bài tập 1 - HomeScreen
+// TODO: [Session 5] Bài tập 1 - HomeScreen
 // Params: onLogout: () -> Unit
 // UI: Column centered, Text "🏠 Trang chủ", OutlinedButton "Đăng xuất"
 @Composable
