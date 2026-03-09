@@ -7,20 +7,26 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import androidx.compose.runtime.Immutable
 import com.apero.composetraining.common.AppTheme
 import com.apero.composetraining.common.SessionDetail
 import com.apero.composetraining.common.SessionList
@@ -37,17 +43,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// Thông tin 7 sessions
-private val sessions = listOf(
-    SessionInfo(1, "Compose Fundamentals", "Text, Image, Button, Modifier, Column/Row/Box", "🧱"),
-    SessionInfo(2, "Layouts & Lazy Components", "LazyColumn, LazyRow, LazyGrid, Scaffold", "📐"),
-    SessionInfo(3, "State & Recomposition", "remember, State hoisting, derivedStateOf", "🔄"),
-    SessionInfo(4, "Theming & Styling", "MaterialTheme, Custom colors, Dark mode", "🎨"),
-    SessionInfo(5, "Navigation & Side Effects", "NavHost, Arguments, Bottom nav, Deep links", "🧭"),
-    SessionInfo(6, "Animation & Gesture", "animate*AsState, AnimatedVisibility, Gestures", "✨"),
-    SessionInfo(7, "Testing & Performance", "ComposeTestRule, @Stable, Performance audit", "🧪"),
-)
-
+// ✅ @Immutable — Compose biết object này không bao giờ thay đổi
+// → SessionCard skip recompose kể cả khi parent recompose (vd: dialog mở/đóng)
+@Immutable
 private data class SessionInfo(
     val number: Int,
     val title: String,
@@ -55,11 +53,22 @@ private data class SessionInfo(
     val emoji: String
 )
 
+// Thông tin 7 sessions (chỉ 7, không duplicate)
+private val sessions = listOf(
+    SessionInfo(1, "Compose Fundamentals", "Text, Image, Button, Modifier, Column/Row/Box", "🧱"),
+    SessionInfo(2, "Layouts", "LazyColumn, LazyRow, BoxWithConstraints, Custom Layout", "📐"),
+    SessionInfo(3, "State & Recomposition", "remember, State hoisting, derivedStateOf, snapshotFlow", "🔄"),
+    SessionInfo(4, "Lazy Layouts", "LazyColumn, LazyGrid, keys, animateItem", "⚡"),
+    SessionInfo(5, "Navigation", "Navigation 3, Type-safe Keys, Back stack, Per-tab stacks", "🧭"),
+    SessionInfo(6, "Theming & Styling", "MaterialTheme, Custom colors, Dark mode, Typography", "🎨"),
+    SessionInfo(7, "Architecture & Effects", "LaunchedEffect, DisposableEffect, ViewModel, UiState", "✨"),
+)
+
 @Composable
-fun MainNavigation() {
+fun MainNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = SessionList) {
+    NavHost(navController = navController, startDestination = SessionList, modifier = modifier) {
         composable<SessionList> {
             SessionListScreen(onSessionClick = { number ->
                 navController.navigate(SessionDetail(number))
@@ -77,26 +86,119 @@ fun MainNavigation() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SessionListScreen(onSessionClick: (Int) -> Unit = {}) {
+fun SessionListScreen(modifier: Modifier = Modifier, onSessionClick: (Int) -> Unit = {}) {
+    // ✅ Cheese pattern: selectedSession thay vì Boolean flag
+    // → null = không có dialog, non-null = hiện dialog session đó
+    var selectedSession by remember { mutableStateOf<SessionInfo?>(null) }
+
+    // ✅ Stable lambda — capture setter (MutableState), không capture value
+    // → reference không đổi qua các recompose → SessionCard không recompose vì lambda
+    val onCardClick = remember<(SessionInfo) -> Unit> {
+        { session -> selectedSession = session }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("🎓 Compose Training", fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent
                 )
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+        // ✅ Tách LazyColumn vào composable riêng — scope recompose độc lập
+        // → selectedSession thay đổi → SessionListScreen recompose
+        //   NHƯNG SessionList nhận cùng params → skip recompose luôn
+        SessionList(
+            sessions = sessions,
+            onSessionClick = onCardClick,
+            modifier = Modifier.padding(padding)
+        )
+
+        // ✅ Dialog nằm ngoài SessionList scope — chỉ Dialog recompose khi selectedSession thay đổi
+        // → LazyColumn bên trong SessionList KHÔNG bao giờ recompose vì dialog mở/đóng
+        selectedSession?.let { session ->
+            SessionPreviewDialog(
+                session = session,
+                onNavigate = {
+                    onSessionClick(session.number)
+                    selectedSession = null
+                },
+                onDismiss = { selectedSession = null }
+            )
+        }
+    }
+}
+
+// ✅ Composable riêng → scope recompose độc lập với dialog state
+@Composable
+private fun SessionList(
+    sessions: List<SessionInfo>,
+    onSessionClick: (SessionInfo) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // ✅ items thay vì itemsIndexed (không cần index)
+        // ✅ key = id ổn định → chỉ recompose item thực sự thay đổi
+        items(sessions, key = { it.number }) { session ->
+            SessionCard(session = session, onClick = { onSessionClick(session) })
+        }
+    }
+}
+
+// ✅ Dialog tách biệt hoàn toàn — không liên quan đến LazyColumn scope
+@Composable
+private fun SessionPreviewDialog(
+    session: SessionInfo,
+    onNavigate: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = MaterialTheme.shapes.extraLarge,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            itemsIndexed(sessions, key = { _, s -> s.number }) { _, session ->
-                SessionCard(session = session, onClick = { onSessionClick(session.number) })
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text(
+                    text = session.emoji,
+                    style = MaterialTheme.typography.displaySmall
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Session ${session.number}: ${session.title}",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = session.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Đóng")
+                    }
+                    Button(
+                        onClick = onNavigate,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Vào học →")
+                    }
+                }
             }
         }
     }
@@ -149,7 +251,11 @@ private fun SessionCard(session: SessionInfo, onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SessionDetailScreen(sessionNumber: Int, onBack: () -> Unit = {}) {
+fun SessionDetailScreen(
+    sessionNumber: Int,
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = {}
+) {
     val session = sessions.find { it.number == sessionNumber } ?: return
 
     Scaffold(
@@ -167,7 +273,8 @@ fun SessionDetailScreen(sessionNumber: Int, onBack: () -> Unit = {}) {
                     }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -231,7 +338,7 @@ fun SessionDetailScreen(sessionNumber: Int, onBack: () -> Unit = {}) {
                         Text("💡 Tip", fontWeight = FontWeight.Bold)
                         Text(
                             "Dùng Android Studio Preview để xem kết quả ngay. " +
-                                "Không cần build app mỗi lần thay đổi code!",
+                                    "Không cần build app mỗi lần thay đổi code!",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
