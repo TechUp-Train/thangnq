@@ -1,8 +1,15 @@
 package com.apero.composetraining.session4.exercises
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,22 +28,64 @@ import com.apero.composetraining.common.AppTheme
 
 @Composable
 fun WeatherCardScreen() {
-    // TODO: [Session 4] Bài tập 1 - Tạo state cho dark mode toggle
-    // var isDark by remember { mutableStateOf(false) }
+    var isDark by rememberSaveable { mutableStateOf(false) }
 
-    // TODO: [Session 4] Bài tập 1 - Wrap trong AppTheme(darkTheme = isDark, dynamicColor = false)
+    AppTheme(darkTheme = isDark) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Dark Mode",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Switch(
+                        checked = isDark,
+                        onCheckedChange = { isDark = it }
+                    )
+                }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        // TODO: [Session 4] Bài tập 1 - Row với Text "Dark Mode" + Switch
-
-        // TODO: [Session 4] Bài tập 1 - Card với RoundedCornerShape(16.dp) chứa:
-        // - Text "Hà Nội" (titleLarge, colorScheme.primary)
-        // - Text "32°C" (headlineMedium, colorScheme.onSurface)
-        // - Text "Sunny ☀️" (bodyLarge, colorScheme.onSurfaceVariant)
-        // KHÔNG hardcode color — dùng MaterialTheme.colorScheme.xxx
-
-        // Placeholder
-        Text("Bắt đầu code Weather Card ở đây!", modifier = Modifier.padding(16.dp))
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Hanoi",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "32°C",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Sunny",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
