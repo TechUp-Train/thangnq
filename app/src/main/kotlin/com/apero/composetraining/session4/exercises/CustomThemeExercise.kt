@@ -1,12 +1,20 @@
 package com.apero.composetraining.session4.exercises
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import android.content.res.Configuration
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.apero.composetraining.common.AppTheme
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
+import androidx.navigationevent.NavigationEventDispatcher
+import androidx.navigationevent.NavigationEventDispatcherOwner
+import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
+import com.apero.composetraining.session4.exercises.custom_theme.screens.DetailScreen
+import com.apero.composetraining.session4.exercises.custom_theme.screens.HomeScreen
+import com.apero.composetraining.session4.exercises.custom_theme.theme.MyAppTheme
+import kotlinx.serialization.Serializable
 
 /**
  * ⭐⭐ BÀI TẬP 2: Custom Theme (Medium)
@@ -20,51 +28,82 @@ import com.apero.composetraining.common.AppTheme
  * - isSystemInDarkTheme() tự switch
  */
 
-// TODO: [Session 4] Bài tập 2 - Định nghĩa custom light color scheme
-// private val MyLightColors = lightColorScheme(
-//     primary = Color(0xFF...),
-//     secondary = Color(0xFF...),
-//     ...
-// )
+@Serializable
+sealed class CustomThemeKey : NavKey {
+    @Serializable
+    data object Home : CustomThemeKey()
 
-// TODO: [Session 4] Bài tập 2 - Định nghĩa custom dark color scheme
-// private val MyDarkColors = darkColorScheme(...)
-
-// TODO: [Session 4] Bài tập 2 - Tạo custom Typography
-// private val MyTypography = Typography(
-//     headlineMedium = TextStyle(...),
-//     bodyLarge = TextStyle(...),
-//     ...
-// )
-
-// TODO: [Session 4] Bài tập 2 - Tạo MyAppTheme wrapper composable
-// @Composable
-// fun MyAppTheme(
-//     darkTheme: Boolean = isSystemInDarkTheme(),
-//     content: @Composable () -> Unit
-// ) {
-//     MaterialTheme(
-//         colorScheme = if (darkTheme) MyDarkColors else MyLightColors,
-//         typography = MyTypography,
-//         content = content
-//     )
-// }
-
-@Composable
-fun CustomThemeHomeScreen() {
-    // TODO: [Session 4] Bài tập 2 - Wrap trong MyAppTheme, tạo Home screen đơn giản
-    // Card + Text dùng MaterialTheme.colorScheme + typography
-    Text("Bắt đầu code Custom Theme ở đây!", modifier = Modifier.padding(16.dp))
+    @Serializable
+    data class Detail(val itemId: Int) : CustomThemeKey()
 }
 
 @Composable
-fun CustomThemeDetailScreen() {
-    // TODO: [Session 4] Bài tập 2 - Detail screen cũng dùng MyAppTheme
-    Text("Detail screen với Custom Theme", modifier = Modifier.padding(16.dp))
+fun CustomThemeApp() {
+    val backStack = rememberNavBackStack(CustomThemeKey.Home)
+
+    MyAppTheme {
+        NavDisplay(
+            backStack = backStack,
+            onBack = {
+                if (backStack.size > 1) {
+                    backStack.removeLastOrNull()
+                }
+            },
+            entryProvider = entryProvider {
+                entry<CustomThemeKey.Home> {
+                    HomeScreen(
+                        onItemClick = { itemId ->
+                            backStack.add(CustomThemeKey.Detail(itemId))
+                        }
+                    )
+                }
+
+                entry<CustomThemeKey.Detail> { key ->
+                    DetailScreen(
+                        itemId = key.itemId,
+                        onBack = {
+                            if (backStack.size > 1) {
+                                backStack.removeLastOrNull()
+                            }
+                        }
+                    )
+                }
+            }
+        )
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun CustomThemeHomeScreenPreview() {
-    AppTheme { CustomThemeHomeScreen() }
+private fun CustomThemeAppPreview() {
+    val dispatcher = remember { NavigationEventDispatcher() }
+
+    val dispatcherOwner = remember {
+        object : NavigationEventDispatcherOwner {
+            override val navigationEventDispatcher = dispatcher
+        }
+    }
+
+    CompositionLocalProvider(LocalNavigationEventDispatcherOwner provides dispatcherOwner) {
+        CustomThemeApp()
+    }
+}
+
+@Preview(
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+private fun DarkCustomThemeAppPreview() {
+    val dispatcher = remember { NavigationEventDispatcher() }
+
+    val dispatcherOwner = remember {
+        object : NavigationEventDispatcherOwner {
+            override val navigationEventDispatcher = dispatcher
+        }
+    }
+
+    CompositionLocalProvider(LocalNavigationEventDispatcherOwner provides dispatcherOwner) {
+        CustomThemeApp()
+    }
 }
