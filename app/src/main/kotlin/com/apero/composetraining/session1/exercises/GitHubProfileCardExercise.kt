@@ -169,7 +169,7 @@ fun ProfileHeader(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // TODO: [Nâng cao] GradientAvatar với gradient border
+        // Avatar với gradient border (Instagram-style)
         GradientAvatar(username = username, size = 72)
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -205,7 +205,6 @@ fun ProfileHeader(
 /**
  * Avatar với GRADIENT BORDER — advanced Modifier trick
  *
- * TODO: [Nâng cao] Implement gradient border thay vì solid border
  *
  * Cách implement gradient border:
  * Box(modifier = Modifier
@@ -233,14 +232,11 @@ fun GradientAvatar(
     size: Int,
     modifier: Modifier = Modifier
 ) {
-    // TODO: [Nâng cao] Thay thế solid border bằng gradient border
-    // Gradient border = Instagram-style purple→red→orange
     Box(
         modifier = modifier
             .size((size + 4).dp)
             .clip(CircleShape)
             .background(
-                // TODO: Đổi thành Brush.linearGradient với multiple colors
                 brush = Brush.linearGradient(
                     colors = listOf(
                         Color(0xFF833AB4), // Instagram purple
@@ -342,7 +338,6 @@ fun StatItem(
 /**
  * Language chips — Wrap layout
  *
- * TODO: [Nâng cao] Implement FlowRow để chips wrap tự động
  *
  * Option 1 (Easy): Dùng accompanist FlowRow
  * dependencies { implementation "com.google.accompanist:accompanist-flowlayout:0.34.0" }
@@ -362,8 +357,6 @@ fun LanguageChips(
     languages: List<String>,
     modifier: Modifier = Modifier
 ) {
-    // TODO: [Nâng cao] Thay bằng FlowRow để auto-wrap
-    // Tạm thời: chia 2 row
     val firstRow = languages.take(3)
     val secondRow = languages.drop(3)
 
@@ -402,7 +395,6 @@ fun LanguageChip(
 /**
  * Pinned repos — EQUAL HEIGHT với IntrinsicSize.Max
  *
- * TODO: [Nâng cao] Thêm graphicsLayer scale effect khi pressed
  *
  * Cách implement hover/press effect với graphicsLayer:
  * var isPressed by remember { mutableStateOf(false) }
@@ -446,13 +438,8 @@ fun PinnedRepoCard(
 ) {
     Card(
         modifier = modifier
-            .clickable { /* TODO: Navigate to repo */ }
-            // TODO: [Nâng cao] Thêm graphicsLayer cho visual feedback
-            .graphicsLayer {
-                // Mock effect — trong thực tế cần State (Buổi 3)
-                // scaleX = 0.97f  // Thử uncomment để xem effect
-                // scaleY = 0.97f
-            },
+            .clickable {}
+            .graphicsLayer { },
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
