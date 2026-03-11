@@ -54,8 +54,6 @@ fun SocialPostCard(
     commentCount: Int = 0,
     retweetCount: Int = 0,
     modifier: Modifier = Modifier,
-    // TODO: [Nâng cao] Khai báo nullable slot cho attachment
-    // Gợi ý: attachment: (@Composable () -> Unit)? = null
     attachment: (@Composable () -> Unit)? = null
 ) {
     Card(
@@ -73,7 +71,6 @@ fun SocialPostCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             // 2. Content text — giới hạn 3 dòng
-            // TODO: [Nâng cao] Thêm maxLines và overflow
             Text(
                 text = content,
                 style = MaterialTheme.typography.bodyMedium,
@@ -82,8 +79,6 @@ fun SocialPostCard(
             )
 
             // 3. Attachment slot — chỉ render khi có
-            // TODO: [Nâng cao] Kiểm tra attachment != null trước khi render
-            // Gợi ý: if (attachment != null) { Spacer + attachment() }
             attachment?.let {
                 Spacer(modifier = Modifier.height(8.dp))
                 it()
@@ -115,8 +110,6 @@ fun PostHeader(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // TODO: Avatar circle với màu từ username
-        // Gợi ý: dùng MaterialTheme.colorScheme.primary hoặc tính màu từ username.hashCode()
         UserAvatar(username = username)
 
         Spacer(modifier = Modifier.width(10.dp))
@@ -141,11 +134,6 @@ fun UserAvatar(
     username: String,
     modifier: Modifier = Modifier
 ) {
-    // TODO: [Nâng cao] Tính màu từ username.hashCode() thay vì hardcode
-    // Gợi ý:
-    // val avatarColors = listOf(Color(0xFF1DA1F2), Color(0xFFE0245E), ...)
-    // val color = avatarColors[abs(username.hashCode()) % avatarColors.size]
-
     val avatarColors = listOf(
         MaterialTheme.colorScheme.primary,
         MaterialTheme.colorScheme.secondary,
@@ -180,9 +168,6 @@ fun PostActionBar(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // TODO: [Nâng cao] Tạo ActionItem composable reusable thay vì lặp code
-        // Gợi ý: ActionItem(icon, count, onClick, modifier)
-
         ActionItem(
             icon = Icons.Outlined.FavoriteBorder,
             count = likeCount,
@@ -267,7 +252,6 @@ private fun SocialPostWithImagePreview() {
             likeCount = 15,
             commentCount = 3,
             retweetCount = 2,
-            // TODO: [Nâng cao] Thêm Image thật từ painterResource hoặc AsyncImage
             attachment = {
                 Box(
                     modifier = Modifier
