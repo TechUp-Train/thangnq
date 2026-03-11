@@ -13,4 +13,6 @@
     <color name="border_subtle">#e5e4e1</color>
     <color name="text_tertiary">#9c9b99</color>
     <color name="uncheck_track">#E0DFDC</color>
+    <color name="error_red">#d32f2f</color>
+    <color name="error_red_light">#ffebee</color>
 </resources>
