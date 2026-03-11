@@ -55,10 +55,7 @@ fun InteractiveCounterScreen() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // TODO: [Session 3] Bài tập 1 - Tạo biến count dùng rememberSaveable
-        // var count by rememberSaveable { mutableIntStateOf(0) }
         var count by rememberSaveable { mutableIntStateOf(0) }
-        // TODO: [Session 3] Bài tập 1 - Hiển thị count với fontSize 48sp
         Text(
             text = "$count",
             fontSize = 72.sp,
@@ -67,10 +64,6 @@ fun InteractiveCounterScreen() {
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // TODO: [Session 3] Bài tập 1 - Tạo Row chứa 3 buttons: "-", "+", "Reset"
-        // Button "-": giảm count (nhưng không < 0)
-        // Button "+": tăng count
-        // Button "Reset": đặt count = 0
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -110,7 +103,7 @@ fun InteractiveCounterScreen() {
                 }
             }
             OutlinedButton(
-                onClick = {},
+                onClick = { count = 0 },
                 shape = RoundedCornerShape(14.dp),
                 border = BorderStroke(
                     width = 1.dp,
