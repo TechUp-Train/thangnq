@@ -35,7 +35,13 @@ data class Product(
     val imageUrl: String = "https://picsum.photos/seed/product$id/200/200",
     val description: String = "",
     val isAiRecommended: Boolean = false,
-    val isTrending: Boolean = false
+    val isTrending: Boolean = false,
+    val categoryId: String
+)
+
+data class Category(
+    val id: String,
+    val name: String = "Category $id"
 )
 
 data class Todo(
@@ -102,16 +108,16 @@ object SampleData {
     )
 
     val products = listOf(
-        Product(1, "iPhone 16 Pro", 999.0, "Electronics", description = "Latest Apple smartphone", isAiRecommended = true),
-        Product(2, "MacBook Air M3", 1099.0, "Electronics", description = "Ultra-thin laptop", isTrending = true),
-        Product(3, "AirPods Pro 3", 249.0, "Electronics", description = "Noise-cancelling earbuds"),
-        Product(4, "Nike Air Max", 159.0, "Fashion", description = "Classic running shoes", isTrending = true),
-        Product(5, "Kindle Paperwhite", 139.0, "Electronics", description = "E-reader with warm light"),
-        Product(6, "Lego Technic", 89.0, "Toys", description = "Building set for adults", isAiRecommended = true),
-        Product(7, "Uniqlo T-Shirt", 19.0, "Fashion", description = "Basic cotton tee"),
-        Product(8, "Sony WH-1000XM5", 349.0, "Electronics", description = "Premium headphones", isAiRecommended = true),
-        Product(9, "Moleskine Notebook", 25.0, "Stationery", description = "Classic ruled notebook"),
-        Product(10, "Anker PowerBank", 45.0, "Electronics", description = "20000mAh portable charger")
+        Product(1, "iPhone 16 Pro", 999.0, "Electronics", description = "Latest Apple smartphone", isAiRecommended = true, categoryId = "1"),
+        Product(2, "MacBook Air M3", 1099.0, "Electronics", description = "Ultra-thin laptop", isTrending = true, categoryId = "2"),
+        Product(3, "AirPods Pro 3", 249.0, "Electronics", description = "Noise-cancelling earbuds", categoryId = "3"),
+        Product(4, "Nike Air Max", 159.0, "Fashion", description = "Classic running shoes", isTrending = true, categoryId = "4"),
+        Product(5, "Kindle Paperwhite", 139.0, "Electronics", description = "E-reader with warm light", categoryId = "5"),
+        Product(6, "Lego Technic", 89.0, "Toys", description = "Building set for adults", isAiRecommended = true, categoryId = "1"),
+        Product(7, "Uniqlo T-Shirt", 19.0, "Fashion", description = "Basic cotton tee", categoryId = "2"),
+        Product(8, "Sony WH-1000XM5", 349.0, "Electronics", description = "Premium headphones", isAiRecommended = true, categoryId = "2"),
+        Product(9, "Moleskine Notebook", 25.0, "Stationery", description = "Classic ruled notebook", categoryId = "3"),
+        Product(10, "Anker PowerBank", 45.0, "Electronics", description = "20000mAh portable charger", categoryId = "4")
     )
 
     val todos = (1..20).map { i ->

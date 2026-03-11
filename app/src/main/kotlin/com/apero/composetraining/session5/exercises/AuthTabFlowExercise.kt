@@ -1,23 +1,14 @@
 package com.apero.composetraining.session5.exercises
 
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.apero.composetraining.common.AppTheme
-// TODO: Thêm imports Nav3
-// import androidx.navigation3.runtime.NavKey
-// import androidx.navigation3.runtime.entryProvider
-// import androidx.navigation3.runtime.rememberNavBackStack
-// import androidx.navigation3.ui.NavDisplay
-// import kotlinx.serialization.Serializable
+import com.apero.composetraining.session5.exercises.auth_exercise.auth_flow.AuthFlow
+import com.apero.composetraining.session5.exercises.auth_exercise.main_flow.MainFlow
 
 /**
  * ⭐⭐⭐⭐ BÀI TẬP 4: Auth + Tab App (Advanced — 120 phút)
@@ -129,40 +120,35 @@ import com.apero.composetraining.common.AppTheme
  * - Logout → Auth flow (không thể back về Main)
  */
 
-// TODO: [Session 5] Bài tập 4 - Định nghĩa AuthKey sealed class
-// @Serializable
-// sealed class AuthKey : NavKey { ... }
 
-// TODO: [Session 5] Bài tập 4 - Định nghĩa Main keys
-// @Serializable data object FeedKey : NavKey
-// @Serializable data class PostDetailKey(val postId: Int) : NavKey
-// ...
-
-// TODO: [Session 5] Bài tập 4 - data class UserData(val name: String, val role: String)
-
-// TODO: [Session 5] Bài tập 4 - enum class Tab { FEED, DISCOVER, PROFILE }
-
-// TODO: [Session 5] Bài tập 4 - Implement AuthTabApp (top-level: isAuthenticated state)
+/**
+ * AuthTabApp - Top-level composable quản lý authentication state
+ * 
+ * Luồng hoạt động:
+ * 1. isAuthenticated = false → Hiển thị AuthFlow (Login/Register/ForgotPassword)
+ * 2. User login thành công → isAuthenticated = true → Hiển thị MainFlow (Feed/Discover/Profile)
+ * 3. User logout → isAuthenticated = false → Quay về AuthFlow
+ * 
+ * Đặc điểm quan trọng:
+ * - Auth stack và Main stack hoàn toàn độc lập
+ * - Khi switch giữa Auth và Main, stack cũ bị destroy
+ * - Không thể back từ Main về Auth sau khi đã login
+ * - Không thể back từ Auth về Main sau khi đã logout
+ */
 @Composable
 fun AuthTabApp() {
-    // TODO: isAuthenticated state
-    // if (isAuthenticated) MainFlow(...) else AuthFlow(...)
+    var isAuthenticated by remember { mutableStateOf(false) }
 
-    // Placeholder
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("TODO: Implement Auth + Tab App")
+    if (isAuthenticated) {
+        MainFlow(
+            onLogout = { isAuthenticated = false }
+        )
+    } else {
+        AuthFlow(
+            onLoginSuccess = { isAuthenticated = true }
+        )
     }
 }
-
-// TODO: [Session 5] Bài tập 4 - AuthFlow composable
-// Params: onLoginSuccess: () -> Unit
-
-// TODO: [Session 5] Bài tập 4 - MainFlow composable
-// Params: onLogout: () -> Unit
-
-// TODO: [Session 5] Bài tập 4 - Implement tất cả screen composables
-// LoginScreen, RegisterScreen, ForgotPasswordScreen
-// FeedScreen, PostDetailScreen, DiscoverScreen, ProfileScreen, EditProfileScreen
 
 @Preview(showBackground = true)
 @Composable
