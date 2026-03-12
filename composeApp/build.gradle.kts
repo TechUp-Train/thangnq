@@ -29,6 +29,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -42,12 +43,15 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
 
             implementation(libs.coil.compose)
-//            implementation(libs.coil.network.okhttp)
+            implementation(libs.coil.network.ktor)
 
             implementation(libs.navigation3)
 //            implementation(libs.kotlinx.serialization.json)
 
             implementation(libs.compose.navigationevent)
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
