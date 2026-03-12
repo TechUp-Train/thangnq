@@ -46,7 +46,6 @@ data class UserProfile(
     val followingCount: Int
 )
 
-// TODO: [Session 2] Bài tập 1 - Implement ProfileCard composable
 // Params: profile: UserProfile, onFollowClick: () -> Unit, modifier: Modifier = Modifier
 // Layout gợi ý:
 //   Card {
@@ -67,7 +66,6 @@ data class UserProfile(
 //     }
 //   }
 
-// TODO: [Session 2] Bài tập 1 - Implement StatColumn composable (private, stateless)
 // Params: label: String, count: Int
 // Layout: Column(CenterHorizontally) { Text(count bold 18sp); Text(label gray 12sp) }
 
@@ -83,11 +81,9 @@ fun ProfileCardScreen() {
 
     Box(
         modifier = Modifier
-            .fillMaxSize()
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        // TODO: Thay placeholder bằng ProfileCard(profile, onFollowClick = {})
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -137,7 +133,6 @@ fun ProfileCardScreen() {
                     )
                     StatItemCompose(label = "Following", value = profile.followingCount.toString())
                 }
-                Spacer(Modifier.weight(1f))
                 Button(onClick = {}, modifier = Modifier.fillMaxWidth()) { Text("Follow") }
             }
         }

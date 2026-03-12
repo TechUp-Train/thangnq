@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,7 +51,6 @@ data class StatData(
 /**
  * Card hiển thị 1 stat với Slot API cho trend
  *
- * TODO: [Nâng cao] Tại sao Slot API tốt hơn truyền thẳng TrendIndicator vào?
  * → Caller có thể truyền bất kỳ UI nào vào (TrendIndicator, Chart, Badge...)
  */
 @Composable
@@ -101,7 +101,6 @@ fun StatCard(
 /**
  * Trend indicator: icon mũi tên + percentage + màu
  *
- * TODO: [Nâng cao - Compose Phase] So sánh 2 cách rotate icon:
  *
  * // ❌ Cách 1: Modifier.rotate() — trigger cả 3 phases (Composition + Layout + Drawing)
  * Icon(modifier = Modifier.rotate(if (isPositive) 0f else 180f))
@@ -129,7 +128,6 @@ fun TrendIndicator(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        // TODO: [Nâng cao] Thay Modifier.rotate bằng graphicsLayer để skip Layout phase
         // Đây là ví dụ thực tế của Slide 11 — Smart Optimization
         Icon(
             imageVector = if (isPositive) Icons.AutoMirrored.Filled.TrendingUp else Icons.AutoMirrored.Filled.TrendingDown,
@@ -137,12 +135,7 @@ fun TrendIndicator(
             tint = color,
             modifier = Modifier
                 .size(16.dp)
-                // ✅ graphicsLayer: chỉ Drawing phase — không trigger Layout
-                .graphicsLayer {
-                    // Không cần rotate icon vì dùng TrendingUp/TrendingDown riêng
-                    // Nhưng nếu chỉ dùng 1 icon, rotate ở đây:
-                    // rotationZ = if (isPositive) 0f else 180f
-                }
+                .graphicsLayer { }
         )
 
         Text(
@@ -157,7 +150,6 @@ fun TrendIndicator(
 /**
  * Dashboard chứa 4 StatCards trong 2x2 grid
  *
- * TODO: [Nâng cao] Key implementation — IntrinsicSize.Max cho equal height
  *
  * Vấn đề: 2 card trong Row có content khác nhau → height khác nhau → layout không đều
  *
@@ -203,11 +195,10 @@ fun StatsDashboard(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Row 1 — 2 stat cards EQUAL HEIGHT
-            // TODO: [Nâng cao] Thêm Modifier.height(IntrinsicSize.Max) vào Row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(IntrinsicSize.Max), // ← EQUAL HEIGHT magic
+                    .height(IntrinsicSize.Max),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 if (stats.isNotEmpty()) {
