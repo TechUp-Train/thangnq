@@ -43,6 +43,9 @@ kotlin {
 
             implementation(libs.coil.compose)
             implementation(libs.coil.network.okhttp)
+
+            implementation(libs.navigation3)
+//            implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
