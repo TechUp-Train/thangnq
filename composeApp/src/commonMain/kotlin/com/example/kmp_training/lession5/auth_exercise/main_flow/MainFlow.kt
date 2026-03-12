@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
@@ -23,19 +24,22 @@ import com.example.kmp_training.lession5.auth_exercise.ProfileKey
 import com.example.kmp_training.lession5.auth_exercise.data.Tab
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainFlow(
     onLogout: () -> Unit
 ) {
-    val config = SavedStateConfiguration{
+    val config = SavedStateConfiguration {
         serializersModule = SerializersModule {
-            polymorphic(FeedKey::class)
-            polymorphic(DiscoverKey::class)
-            polymorphic(ProfileKey::class)
-            polymorphic(PostDetailKey::class)
-            polymorphic(EditProfileKey::class)
+            polymorphic(NavKey::class) {
+                subclass(FeedKey::class)
+                subclass(DiscoverKey::class)
+                subclass(ProfileKey::class)
+                subclass(PostDetailKey::class)
+                subclass(EditProfileKey::class)
+            }
         }
     }
 
