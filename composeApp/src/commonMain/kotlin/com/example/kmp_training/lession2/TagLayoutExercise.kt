@@ -1,0 +1,157 @@
+package com.example.kmp_training.lession2
+
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.kmp_training.common.AppTheme
+
+/**
+ * ⭐⭐⭐⭐ BÀI TẬP 4: Custom Tag Layout (Nâng cao — 45 phút)
+ *
+ * Yêu cầu:
+ * - Dùng Layout composable (custom layout) để wrap tags sang hàng mới khi hết width
+ * - KHÔNG được dùng FlowRow có sẵn của Compose
+ * - Tags wraps tự nhiên như text flow
+ * - 8dp spacing giữa các tag, 8dp spacing giữa các hàng
+ *
+ * Tiêu chí:
+ * - Implement đúng Layout { measurables, constraints -> ... }
+ * - MeasurePolicy tự tính x, y của từng tag theo available width
+ * - Tags không bị cắt ở cuối dòng
+ * - Spacing đúng (8dp horizontal, 8dp vertical)
+ *
+ * Gợi ý implementation:
+ * Layout(content = content) { measurables, constraints ->
+ *     val placeables = measurables.map { it.measure(constraints.copy(minWidth = 0)) }
+ *     val gap = 8.dp.roundToPx()
+ *     var x = 0; var y = 0; var rowHeight = 0
+ *
+ *     for (placeable in placeables) {
+ *         if (x + placeable.width > constraints.maxWidth && x > 0) {
+ *             x = 0; y += rowHeight + gap; rowHeight = 0  // xuống hàng mới
+ *         }
+ *         rowHeight = maxOf(rowHeight, placeable.height)
+ *         x += placeable.width + gap
+ *     }
+ *
+ *     layout(width = constraints.maxWidth, height = y + rowHeight) {
+ *         // place mỗi placeable theo vị trí đã tính
+ *     }
+ * }
+ *
+ * Lưu ý: Phải tính lại x, y 2 lần — lần 1 để biết tổng height, lần 2 để place.
+ */
+
+@Composable
+fun TagsLayout(
+    tags: List<String>,
+    modifier: Modifier = Modifier
+) {
+    Layout(
+        modifier = modifier,
+        content = {
+            tags.forEach { tag ->
+                SuggestionChip(
+                    onClick = {},
+                    label = { Text(tag) }
+                )
+            }
+        }
+    ) { measurables, constraints ->
+        val placeables = measurables.map { it.measure(constraints.copy(minWidth = 0)) }
+        val gap = 8.dp.roundToPx()
+        var x = 0
+        var y = 0
+        var rowHeight = 0
+        
+        for (placeable in placeables) {
+            if (x + placeable.width > constraints.maxWidth && x > 0) {
+                x = 0
+                y += rowHeight + gap
+                rowHeight = 0
+            }
+            rowHeight = maxOf(rowHeight, placeable.height)
+            x += placeable.width + gap
+        }
+        
+        val totalHeight = y + rowHeight
+
+        layout(width = constraints.maxWidth, height = totalHeight) {
+            var currentX = 0
+            var currentY = 0
+            var currentRowHeight = 0
+            
+            placeables.forEach { placeable ->
+                if (currentX + placeable.width > constraints.maxWidth && currentX > 0) {
+                    currentX = 0
+                    currentY += currentRowHeight + gap
+                    currentRowHeight = 0
+                }
+                
+                placeable.placeRelative(x = currentX, y = currentY)
+                
+                currentRowHeight = maxOf(currentRowHeight, placeable.height)
+                currentX += placeable.width + gap
+            }
+        }
+    }
+}
+
+@Composable
+fun TagLayoutScreen() {
+    val tags = listOf(
+        "Android", "Jetpack Compose", "Kotlin", "UI Design",
+        "Material3", "Jetpack", "Mobile Dev", "Coroutines",
+        "Flow", "MVVM", "Clean Architecture", "Hilt"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text("Custom Tag Layout", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            "Implement TagsLayout dùng Layout composable (không dùng FlowRow)",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        HorizontalDivider()
+
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text("Placeholder (chưa wrap đúng cách):",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.labelMedium)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState())
+            ) {
+                tags.forEach { tag ->
+                    SuggestionChip(onClick = {}, label = { Text(tag) })
+                }
+            }
+        }
+
+        HorizontalDivider()
+        Text(
+            "Sau khi implement TagsLayout, tags sẽ tự wrap xuống hàng mới khi hết width ↑",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        TagsLayout(tags = tags)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TagLayoutScreenPreview() {
+    AppTheme { TagLayoutScreen() }
+}
