@@ -153,8 +153,7 @@ fun ECommerceApp() {
 @Composable
 fun AlertWhenBackComponent(
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-    modifier: Modifier = Modifier
+    onConfirm: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,

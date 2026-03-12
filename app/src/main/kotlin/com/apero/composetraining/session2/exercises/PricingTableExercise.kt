@@ -172,7 +172,10 @@ fun PricingCard(plan: PricingPlan, modifier: Modifier = Modifier) {
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             plan.features.forEach { feature ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                ) {
                     Icon(
                         Icons.Default.Check, contentDescription = null,
                         modifier = Modifier.size(14.dp),
@@ -185,9 +188,11 @@ fun PricingCard(plan: PricingPlan, modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.weight(1f))
             Button(
                 onClick = {},
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp)
             ) {
-                Text(text = "Chọn gói")
+                Text(text = "Chọn gói", fontSize = 12.sp)
             }
         }
     }
