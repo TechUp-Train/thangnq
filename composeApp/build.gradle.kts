@@ -46,6 +46,8 @@ kotlin {
 
             implementation(libs.navigation3)
 //            implementation(libs.kotlinx.serialization.json)
+
+            implementation(libs.compose.navigationevent)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
