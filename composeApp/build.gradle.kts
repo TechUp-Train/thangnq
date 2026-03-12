@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -46,7 +47,7 @@ kotlin {
             implementation(libs.coil.network.ktor)
 
             implementation(libs.navigation3)
-//            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.serialization.json)
 
             implementation(libs.compose.navigationevent)
         }
