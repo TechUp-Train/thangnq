@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "title": "Welcome to KMP",
+    "content": "This is the first news in our KMP demo app.",
+    "author": "Admin",
+    "isLiked": false,
+    "createdAt": 1710000000
+  },
+  {
+    "id": 2,
+    "title": "Compose Multiplatform",
+    "content": "Compose Multiplatform helps build UI for Android, iOS and Desktop.",
+    "author": "JetBrains",
+    "isLiked": true,
+    "createdAt": 1710001000
+  },
+  {
+    "id": 3,
+    "title": "Kotlin is fun",
+    "content": "Kotlin Multiplatform allows sharing business logic across platforms.",
+    "author": "Kotlin Team",
+    "isLiked": false,
+    "createdAt": 1710002000
+  },
+  {
+    "id": 4,
+    "title": "Modern Mobile Development",
+    "content": "Developers are increasingly adopting modern frameworks to speed up development.",
+    "author": "Tech Daily",
+    "isLiked": false,
+    "createdAt": 1710003000
+  },
+  {
+    "id": 5,
+    "title": "Why Kotlin Multiplatform",
+    "content": "Kotlin Multiplatform allows developers to share code between Android and iOS.",
+    "author": "Mobile Weekly",
+    "isLiked": true,
+    "createdAt": 1710004000
+  },
+  {
+    "id": 6,
+    "title": "Declarative UI",
+    "content": "Declarative UI frameworks simplify the way developers build interfaces.",
+    "author": "UI Experts",
+    "isLiked": false,
+    "createdAt": 1710005000
+  },
+  {
+    "id": 7,
+    "title": "State Management",
+    "content": "Proper state management is key to building scalable mobile applications.",
+    "author": "Android Dev",
+    "isLiked": false,
+    "createdAt": 1710006000
+  },
+  {
+    "id": 8,
+    "title": "Open Source Growth",
+    "content": "Open source libraries continue to shape the future of mobile development.",
+    "author": "Community",
+    "isLiked": true,
+    "createdAt": 1710007000
+  },
+  {
+    "id": 9,
+    "title": "Compose for iOS",
+    "content": "Compose Multiplatform is making it possible to reuse UI code on iOS.",
+    "author": "JetBrains",
+    "isLiked": false,
+    "createdAt": 1710008000
+  },
+  {
+    "id": 10,
+    "title": "Reactive Programming",
+    "content": "Reactive programming helps manage asynchronous data streams efficiently.",
+    "author": "Software Lab",
+    "isLiked": false,
+    "createdAt": 1710009000
+  },
+  {
+    "id": 11,
+    "title": "Developer Productivity",
+    "content": "Better tooling and languages improve productivity for development teams.",
+    "author": "Dev Insights",
+    "isLiked": true,
+    "createdAt": 1710010000
+  },
+  {
+    "id": 12,
+    "title": "Shared Business Logic",
+    "content": "Sharing business logic across platforms reduces duplicated code.",
+    "author": "Engineering Team",
+    "isLiked": false,
+    "createdAt": 1710011000
+  },
+  {
+    "id": 13,
+    "title": "Future of Cross Platform",
+    "content": "Cross-platform solutions continue evolving with better performance.",
+    "author": "Tech Radar",
+    "isLiked": false,
+    "createdAt": 1710012000
+  },
+  {
+    "id": 14,
+    "title": "Kotlin Community",
+    "content": "The Kotlin community is growing rapidly across the world.",
+    "author": "Kotlin Fans",
+    "isLiked": true,
+    "createdAt": 1710013000
+  },
+  {
+    "id": 15,
+    "title": "Clean Architecture",
+    "content": "Clean architecture helps keep projects maintainable and scalable.",
+    "author": "Architecture Guide",
+    "isLiked": false,
+    "createdAt": 1710014000
+  }
+]
