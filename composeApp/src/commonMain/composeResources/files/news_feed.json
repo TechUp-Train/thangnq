@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "title": "Welcome to KMP",
+    "content": "This is the first news in our KMP demo app.",
+    "author": "Admin",
+    "isLiked": false,
+    "createdAt": 1710000000
+  },
+  {
+    "id": 2,
+    "title": "Compose Multiplatform",
+    "content": "Compose Multiplatform helps build UI for Android, iOS and Desktop.",
+    "author": "JetBrains",
+    "isLiked": true,
+    "createdAt": 1710001000
+  },
+  {
+    "id": 3,
+    "title": "Kotlin is fun",
+    "content": "Kotlin Multiplatform allows sharing business logic across platforms.",
+    "author": "Kotlin Team",
+    "isLiked": false,
+    "createdAt": 1710002000
+  }
+]
